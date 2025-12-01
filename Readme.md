@@ -132,8 +132,7 @@ val groups = mdk.getGroups()
 groups.forEach { group ->
     println("Group: ${group.name}")
     println("ID: ${group.mlsGroupId}")
-    println("State: ${group.state}")
-    // To get member count, use: mdk.getMembers(mlsGroupId = group.mlsGroupId).size
+    println("Members: ${group.members.size}")
 }
 ```
 
@@ -209,10 +208,10 @@ val welcomes = mdk.getPendingWelcomes()
 
 welcomes.forEach { welcome ->
     println("Invited to: ${welcome.groupName}")
-    println("By: ${welcome.welcomer}")
+    println("By: ${welcome.senderPublicKey}")
     
     // Accept the welcome
-    mdk.acceptWelcome(welcomeJson = welcome.eventJson)
+    mdk.acceptWelcome(welcomeJson = welcome.welcomeJson)
 }
 ```
 
@@ -220,7 +219,7 @@ welcomes.forEach { welcome ->
 
 ```kotlin
 val welcome = welcomes.first()
-mdk.declineWelcome(welcomeJson = welcome.eventJson)
+mdk.declineWelcome(welcomeJson = welcome.welcomeJson)
 ```
 
 ### Create and Send Messages
@@ -248,10 +247,9 @@ val eventJson = mdk.createMessage(
 val messages = mdk.getMessages(mlsGroupId = "hex_group_id")
 
 messages.forEach { message ->
-    println("From: ${message.senderPubkey}")
-    println("Event JSON: ${message.eventJson}")
+    println("From: ${message.senderPublicKey}")
+    println("Content: ${message.content}")
     println("Kind: ${message.kind}")
-    // Note: To extract decrypted content, parse the eventJson and extract the content field
 }
 ```
 
@@ -260,8 +258,7 @@ messages.forEach { message ->
 ```kotlin
 val message = mdk.getMessage(eventId = "hex_event_id")
 if (message != null) {
-    println("Message event JSON: ${message.eventJson}")
-    // Note: To extract decrypted content, parse the eventJson and extract the content field
+    println("Message: ${message.content}")
 }
 ```
 
@@ -282,8 +279,7 @@ val result = mdk.processMessage(eventJson = eventJson)
 
 when (result) {
     is MessageProcessingResult.NewMessage -> {
-        println("New message event JSON: ${result.newMessage.eventJson}")
-        // Note: To extract decrypted content, parse the eventJson and extract the content field
+        println("New message: ${result.newMessage.content}")
     }
     is MessageProcessingResult.Duplicate -> {
         println("Message already processed")
@@ -302,8 +298,7 @@ val results = mdk.processMessages(eventJsons = eventJsons)
 
 results.forEach { result ->
     if (result is MessageProcessingResult.NewMessage) {
-        println("Processed message event JSON: ${result.newMessage.eventJson}")
-        // Note: To extract decrypted content, parse the eventJson and extract the content field
+        println("Processed: ${result.newMessage.content}")
     }
 }
 ```
@@ -331,18 +326,12 @@ try {
 
 ```kotlin
 data class Group(
-    val mlsGroupId: String,              // Hex-encoded MLS group ID
-    val nostrGroupId: String,            // Hex-encoded Nostr group ID
+    val mlsGroupId: String,        // Hex-encoded MLS group ID
     val name: String,
     val description: String,
-    val imageHash: List<UByte>?,        // Optional group image hash
-    val imageKey: List<UByte>?,         // Optional group image encryption key
-    val imageNonce: List<UByte>?,       // Optional group image encryption nonce
-    val adminPubkeys: List<String>,     // Admin public keys (hex-encoded)
-    val lastMessageId: String?,         // Last message event ID (hex-encoded)
-    val lastMessageAt: ULong?,          // Timestamp of last message (Unix timestamp)
-    val epoch: ULong,                   // Current epoch number
-    val state: String                   // Group state (e.g., "active", "archived")
+    val relays: List<String>,      // Relay URLs
+    val admins: List<String>,      // Admin public keys (hex)
+    val createdAt: ULong           // Timestamp
 )
 ```
 
@@ -350,15 +339,12 @@ data class Group(
 
 ```kotlin
 data class Message(
-    val id: String,                     // Message ID (hex-encoded event ID)
-    val mlsGroupId: String,             // Hex-encoded MLS group ID
-    val nostrGroupId: String,            // Hex-encoded Nostr group ID
-    val eventId: String,                // Event ID (hex-encoded)
-    val senderPubkey: String,           // Sender public key (hex-encoded)
-    val eventJson: String,              // JSON representation of the event
-    val processedAt: ULong,             // Timestamp when message was processed (Unix timestamp)
-    val kind: UShort,                   // Message kind
-    val state: String                   // Message state (e.g., "processed", "pending")
+    val eventId: String,            // Nostr event ID (hex)
+    val mlsGroupId: String,
+    val senderPublicKey: String,   // Hex-encoded
+    val content: String,           // Decrypted content
+    val kind: UShort,
+    val createdAt: ULong
 )
 ```
 
@@ -366,21 +352,10 @@ data class Message(
 
 ```kotlin
 data class Welcome(
-    val id: String,                     // Welcome ID (hex-encoded event ID)
-    val eventJson: String,              // JSON representation of the welcome event
-    val mlsGroupId: String,             // Hex-encoded MLS group ID
-    val nostrGroupId: String,           // Hex-encoded Nostr group ID
+    val welcomeJson: String,        // Welcome message JSON
     val groupName: String,
     val groupDescription: String,
-    val groupImageHash: List<UByte>?,   // Optional group image hash
-    val groupImageKey: List<UByte>?,    // Optional group image encryption key
-    val groupImageNonce: List<UByte>?,  // Optional group image encryption nonce
-    val groupAdminPubkeys: List<String>, // List of admin public keys (hex-encoded)
-    val groupRelays: List<String>,      // List of relay URLs for the group
-    val welcomer: String,               // Welcomer public key (hex-encoded)
-    val memberCount: UInt,              // Current member count
-    val state: String,                  // Welcome state (e.g., "pending", "accepted", "declined")
-    val wrapperEventId: String         // Wrapper event ID (hex-encoded)
+    val senderPublicKey: String    // Hex-encoded
 )
 ```
 
@@ -395,7 +370,10 @@ data class KeyPackageResult(
 
 ## Thread Safety
 
-A given `Mdk` instance must be confined to a single thread and must not be shared across threads. If you need to use MDK from multiple threads, create separate isolated `Mdk` instances per thread. Note that multi-threaded usage with separate instances is not a supported concurrency model.
+MDK instances are thread-safe internally, but you should avoid sharing a single instance across multiple threads. Instead:
+
+- Create separate MDK instances for different threads if needed
+- Or use thread-local storage or mutexes to serialize access
 
 ## Android Integration
 
@@ -471,8 +449,7 @@ val messageEvent = mdk.createMessage(
 // 5. Retrieve messages
 val messages = mdk.getMessages(mlsGroupId = groupResult.group.mlsGroupId)
 messages.forEach { message ->
-    println("${message.senderPubkey}: ${message.eventJson}")
-    // Note: To extract decrypted content, parse the eventJson and extract the content field
+    println("${message.senderPublicKey}: ${message.content}")
 }
 ```
 
