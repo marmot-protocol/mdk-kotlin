@@ -720,7 +720,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPu
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_create_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`senderPublicKey`: RustBuffer.ByValue,`content`: RustBuffer.ByValue,`kind`: Short,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_create_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`senderPublicKey`: RustBuffer.ByValue,`content`: RustBuffer.ByValue,`kind`: Short,`tags`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
@@ -745,7 +745,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_leave_group(`ptr`: Long,`mlsGroupId
 external fun uniffi_mdk_uniffi_fn_method_mdk_merge_pending_commit(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_parse_key_package(`ptr`: Long,`eventJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): Unit
+): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_process_message(`ptr`: Long,`eventJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_process_welcome(`ptr`: Long,`wrapperEventId`: RustBuffer.ByValue,`rumorEventJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -900,7 +900,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome() != 44970.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_add_members() != 48219.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_add_members() != 19089.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_group() != 56895.toShort()) {
@@ -909,7 +909,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event() != 48232.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_message() != 41079.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_message() != 58601.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome() != 58096.toShort()) {
@@ -939,13 +939,13 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_welcome() != 25012.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_leave_group() != 20702.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_leave_group() != 46166.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_merge_pending_commit() != 22201.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_parse_key_package() != 25544.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_parse_key_package() != 41870.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_process_message() != 15589.toShort()) {
@@ -954,16 +954,16 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_process_welcome() != 34932.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_remove_members() != 46971.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_remove_members() != 31926.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_self_update() != 2372.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_self_update() != 48999.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_sync_group_metadata_from_mls() != 16922.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_update_group_data() != 28107.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_update_group_data() != 32068.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1378,7 +1378,7 @@ public interface MdkInterface {
     /**
      * Add members to a group
      */
-    fun `addMembers`(`mlsGroupId`: kotlin.String, `keyPackageEventsJson`: List<kotlin.String>): AddMembersResult
+    fun `addMembers`(`mlsGroupId`: kotlin.String, `keyPackageEventsJson`: List<kotlin.String>): UpdateGroupResult
     
     /**
      * Create a new group
@@ -1393,7 +1393,7 @@ public interface MdkInterface {
     /**
      * Create a message in a group
      */
-    fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort): kotlin.String
+    fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort, `tags`: List<List<kotlin.String>>?): kotlin.String
     
     /**
      * Decline a welcome message
@@ -1443,7 +1443,7 @@ public interface MdkInterface {
     /**
      * Create a proposal to leave the group
      */
-    fun `leaveGroup`(`mlsGroupId`: kotlin.String): AddMembersResult
+    fun `leaveGroup`(`mlsGroupId`: kotlin.String): UpdateGroupResult
     
     /**
      * Merge pending commit for a group
@@ -1453,7 +1453,7 @@ public interface MdkInterface {
     /**
      * Parse a key package from a Nostr event
      */
-    fun `parseKeyPackage`(`eventJson`: kotlin.String)
+    fun `parseKeyPackage`(`eventJson`: kotlin.String): kotlin.String
     
     /**
      * Process an incoming MLS message
@@ -1468,12 +1468,12 @@ public interface MdkInterface {
     /**
      * Remove members from a group
      */
-    fun `removeMembers`(`mlsGroupId`: kotlin.String, `memberPublicKeys`: List<kotlin.String>): AddMembersResult
+    fun `removeMembers`(`mlsGroupId`: kotlin.String, `memberPublicKeys`: List<kotlin.String>): UpdateGroupResult
     
     /**
      * Update the current member's leaf node in an MLS group
      */
-    fun `selfUpdate`(`mlsGroupId`: kotlin.String): AddMembersResult
+    fun `selfUpdate`(`mlsGroupId`: kotlin.String): UpdateGroupResult
     
     /**
      * Sync group metadata from MLS
@@ -1483,7 +1483,7 @@ public interface MdkInterface {
     /**
      * Update group data (name, description, image, relays, admins)
      */
-    fun `updateGroupData`(`mlsGroupId`: kotlin.String, `update`: GroupDataUpdate): AddMembersResult
+    fun `updateGroupData`(`mlsGroupId`: kotlin.String, `update`: GroupDataUpdate): UpdateGroupResult
     
     companion object
 }
@@ -1607,8 +1607,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Add members to a group
      */
-    @Throws(MdkUniffiException::class)override fun `addMembers`(`mlsGroupId`: kotlin.String, `keyPackageEventsJson`: List<kotlin.String>): AddMembersResult {
-            return FfiConverterTypeAddMembersResult.lift(
+    @Throws(MdkUniffiException::class)override fun `addMembers`(`mlsGroupId`: kotlin.String, `keyPackageEventsJson`: List<kotlin.String>): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_add_members(
@@ -1658,13 +1658,13 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Create a message in a group
      */
-    @Throws(MdkUniffiException::class)override fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort): kotlin.String {
+    @Throws(MdkUniffiException::class)override fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort, `tags`: List<List<kotlin.String>>?): kotlin.String {
             return FfiConverterString.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_message(
         it,
-        FfiConverterString.lower(`mlsGroupId`),FfiConverterString.lower(`senderPublicKey`),FfiConverterString.lower(`content`),FfiConverterUShort.lower(`kind`),_status)
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterString.lower(`senderPublicKey`),FfiConverterString.lower(`content`),FfiConverterUShort.lower(`kind`),FfiConverterOptionalSequenceSequenceString.lower(`tags`),_status)
 }
     }
     )
@@ -1827,8 +1827,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Create a proposal to leave the group
      */
-    @Throws(MdkUniffiException::class)override fun `leaveGroup`(`mlsGroupId`: kotlin.String): AddMembersResult {
-            return FfiConverterTypeAddMembersResult.lift(
+    @Throws(MdkUniffiException::class)override fun `leaveGroup`(`mlsGroupId`: kotlin.String): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_leave_group(
@@ -1860,8 +1860,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Parse a key package from a Nostr event
      */
-    @Throws(MdkUniffiException::class)override fun `parseKeyPackage`(`eventJson`: kotlin.String)
-        = 
+    @Throws(MdkUniffiException::class)override fun `parseKeyPackage`(`eventJson`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_parse_key_package(
@@ -1869,7 +1869,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
         FfiConverterString.lower(`eventJson`),_status)
 }
     }
-    
+    )
+    }
     
 
     
@@ -1910,8 +1911,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Remove members from a group
      */
-    @Throws(MdkUniffiException::class)override fun `removeMembers`(`mlsGroupId`: kotlin.String, `memberPublicKeys`: List<kotlin.String>): AddMembersResult {
-            return FfiConverterTypeAddMembersResult.lift(
+    @Throws(MdkUniffiException::class)override fun `removeMembers`(`mlsGroupId`: kotlin.String, `memberPublicKeys`: List<kotlin.String>): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_remove_members(
@@ -1927,8 +1928,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Update the current member's leaf node in an MLS group
      */
-    @Throws(MdkUniffiException::class)override fun `selfUpdate`(`mlsGroupId`: kotlin.String): AddMembersResult {
-            return FfiConverterTypeAddMembersResult.lift(
+    @Throws(MdkUniffiException::class)override fun `selfUpdate`(`mlsGroupId`: kotlin.String): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_self_update(
@@ -1960,8 +1961,8 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Update group data (name, description, image, relays, admins)
      */
-    @Throws(MdkUniffiException::class)override fun `updateGroupData`(`mlsGroupId`: kotlin.String, `update`: GroupDataUpdate): AddMembersResult {
-            return FfiConverterTypeAddMembersResult.lift(
+    @Throws(MdkUniffiException::class)override fun `updateGroupData`(`mlsGroupId`: kotlin.String, `update`: GroupDataUpdate): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_update_group_data(
@@ -2008,59 +2009,6 @@ public object FfiConverterTypeMdk: FfiConverter<Mdk, Long> {
 
     override fun write(value: Mdk, buf: ByteBuffer) {
         buf.putLong(lower(value))
-    }
-}
-
-
-
-/**
- * Result of adding members to a group
- */
-data class AddMembersResult (
-    /**
-     * JSON-encoded evolution event to be published
-     */
-    var `evolutionEventJson`: kotlin.String
-    , 
-    /**
-     * Optional JSON-encoded welcome rumors to be published
-     */
-    var `welcomeRumorsJson`: List<kotlin.String>?
-    , 
-    /**
-     * Hex-encoded MLS group ID
-     */
-    var `mlsGroupId`: kotlin.String
-    
-){
-    
-
-    
-    companion object
-}
-
-/**
- * @suppress
- */
-public object FfiConverterTypeAddMembersResult: FfiConverterRustBuffer<AddMembersResult> {
-    override fun read(buf: ByteBuffer): AddMembersResult {
-        return AddMembersResult(
-            FfiConverterString.read(buf),
-            FfiConverterOptionalSequenceString.read(buf),
-            FfiConverterString.read(buf),
-        )
-    }
-
-    override fun allocationSize(value: AddMembersResult) = (
-            FfiConverterString.allocationSize(value.`evolutionEventJson`) +
-            FfiConverterOptionalSequenceString.allocationSize(value.`welcomeRumorsJson`) +
-            FfiConverterString.allocationSize(value.`mlsGroupId`)
-    )
-
-    override fun write(value: AddMembersResult, buf: ByteBuffer) {
-            FfiConverterString.write(value.`evolutionEventJson`, buf)
-            FfiConverterOptionalSequenceString.write(value.`welcomeRumorsJson`, buf)
-            FfiConverterString.write(value.`mlsGroupId`, buf)
     }
 }
 
@@ -2622,6 +2570,59 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
 
 
 /**
+ * Result of updating a group
+ */
+data class UpdateGroupResult (
+    /**
+     * JSON-encoded evolution event to be published
+     */
+    var `evolutionEventJson`: kotlin.String
+    , 
+    /**
+     * Optional JSON-encoded welcome rumors to be published
+     */
+    var `welcomeRumorsJson`: List<kotlin.String>?
+    , 
+    /**
+     * Hex-encoded MLS group ID
+     */
+    var `mlsGroupId`: kotlin.String
+    
+){
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeUpdateGroupResult: FfiConverterRustBuffer<UpdateGroupResult> {
+    override fun read(buf: ByteBuffer): UpdateGroupResult {
+        return UpdateGroupResult(
+            FfiConverterString.read(buf),
+            FfiConverterOptionalSequenceString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: UpdateGroupResult) = (
+            FfiConverterString.allocationSize(value.`evolutionEventJson`) +
+            FfiConverterOptionalSequenceString.allocationSize(value.`welcomeRumorsJson`) +
+            FfiConverterString.allocationSize(value.`mlsGroupId`)
+    )
+
+    override fun write(value: UpdateGroupResult, buf: ByteBuffer) {
+            FfiConverterString.write(value.`evolutionEventJson`, buf)
+            FfiConverterOptionalSequenceString.write(value.`welcomeRumorsJson`, buf)
+            FfiConverterString.write(value.`mlsGroupId`, buf)
+    }
+}
+
+
+
+/**
  * Welcome representation
  */
 data class Welcome (
@@ -2910,7 +2911,7 @@ sealed class ProcessMessageResult {
         /**
          * The proposal result containing evolution event and welcome rumors
          */
-        val `result`: AddMembersResult) : ProcessMessageResult()
+        val `result`: UpdateGroupResult) : ProcessMessageResult()
         
     {
         
@@ -2978,7 +2979,7 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 FfiConverterTypeMessage.read(buf),
                 )
             2 -> ProcessMessageResult.Proposal(
-                FfiConverterTypeAddMembersResult.read(buf),
+                FfiConverterTypeUpdateGroupResult.read(buf),
                 )
             3 -> ProcessMessageResult.ExternalJoinProposal(
                 FfiConverterString.read(buf),
@@ -3005,7 +3006,7 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
             // Add the size for the Int that specifies the variant plus the size needed for all fields
             (
                 4UL
-                + FfiConverterTypeAddMembersResult.allocationSize(value.`result`)
+                + FfiConverterTypeUpdateGroupResult.allocationSize(value.`result`)
             )
         }
         is ProcessMessageResult.ExternalJoinProposal -> {
@@ -3040,7 +3041,7 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
             }
             is ProcessMessageResult.Proposal -> {
                 buf.putInt(2)
-                FfiConverterTypeAddMembersResult.write(value.`result`, buf)
+                FfiConverterTypeUpdateGroupResult.write(value.`result`, buf)
                 Unit
             }
             is ProcessMessageResult.ExternalJoinProposal -> {
@@ -3348,6 +3349,38 @@ public object FfiConverterOptionalSequenceString: FfiConverterRustBuffer<List<ko
         } else {
             buf.put(1)
             FfiConverterSequenceString.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalSequenceSequenceString: FfiConverterRustBuffer<List<List<kotlin.String>>?> {
+    override fun read(buf: ByteBuffer): List<List<kotlin.String>>? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterSequenceSequenceString.read(buf)
+    }
+
+    override fun allocationSize(value: List<List<kotlin.String>>?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterSequenceSequenceString.allocationSize(value)
+        }
+    }
+
+    override fun write(value: List<List<kotlin.String>>?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterSequenceSequenceString.write(value, buf)
         }
     }
 }
