@@ -760,7 +760,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_update_group_data(`ptr`: Long,`mlsG
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_func_decrypt_group_image(`encryptedData`: RustBuffer.ByValue,`imageKey`: RustBuffer.ByValue,`imageNonce`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_func_derive_upload_keypair(`imageKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_func_derive_upload_keypair(`imageKey`: RustBuffer.ByValue,`version`: Short,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_func_new_mdk(`dbPath`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
@@ -888,7 +888,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_func_decrypt_group_image() != 61134.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_func_derive_upload_keypair() != 59212.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_func_derive_upload_keypair() != 45595.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk() != 17648.toShort()) {
@@ -3541,12 +3541,12 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
         /**
          * Derive upload keypair for group image
          */
-    @Throws(MdkUniffiException::class) fun `deriveUploadKeypair`(`imageKey`: kotlin.ByteArray): kotlin.String {
+    @Throws(MdkUniffiException::class) fun `deriveUploadKeypair`(`imageKey`: kotlin.ByteArray, `version`: kotlin.UShort): kotlin.String {
             return FfiConverterString.lift(
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_func_derive_upload_keypair(
     
-        FfiConverterByteArray.lower(`imageKey`),_status)
+        FfiConverterByteArray.lower(`imageKey`),FfiConverterUShort.lower(`version`),_status)
 }
     )
     }
