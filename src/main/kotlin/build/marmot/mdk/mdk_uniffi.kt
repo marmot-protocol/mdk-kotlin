@@ -646,6 +646,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome_json(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_add_members(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_group(
@@ -655,6 +657,8 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_message(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome_json(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_group(
     ): Short
@@ -712,7 +716,9 @@ internal object UniffiLib {
 ): Long
 external fun uniffi_mdk_uniffi_fn_free_mdk(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-external fun uniffi_mdk_uniffi_fn_method_mdk_accept_welcome(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_accept_welcome(`ptr`: Long,`welcome`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+external fun uniffi_mdk_uniffi_fn_method_mdk_accept_welcome_json(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_add_members(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`keyPackageEventsJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -722,7 +728,9 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`:
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`senderPublicKey`: RustBuffer.ByValue,`content`: RustBuffer.ByValue,`kind`: Short,`tags`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome(`ptr`: Long,`welcome`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome_json(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_group(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -897,7 +905,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_func_prepare_group_image_for_upload() != 65092.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome() != 44970.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome() != 3695.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_accept_welcome_json() != 39652.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_add_members() != 19089.toShort()) {
@@ -912,7 +923,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_message() != 58601.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome() != 58096.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome() != 57917.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome_json() != 21478.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_group() != 1495.toShort()) {
@@ -1373,7 +1387,12 @@ public interface MdkInterface {
     /**
      * Accept a welcome message
      */
-    fun `acceptWelcome`(`welcomeJson`: kotlin.String)
+    fun `acceptWelcome`(`welcome`: Welcome)
+    
+    /**
+     * Accept a welcome message from JSON
+     */
+    fun `acceptWelcomeJson`(`welcomeJson`: kotlin.String)
     
     /**
      * Add members to a group
@@ -1398,7 +1417,12 @@ public interface MdkInterface {
     /**
      * Decline a welcome message
      */
-    fun `declineWelcome`(`welcomeJson`: kotlin.String)
+    fun `declineWelcome`(`welcome`: Welcome)
+    
+    /**
+     * Decline a welcome message from JSON
+     */
+    fun `declineWelcomeJson`(`welcomeJson`: kotlin.String)
     
     /**
      * Get a group by MLS group ID
@@ -1591,11 +1615,27 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Accept a welcome message
      */
-    @Throws(MdkUniffiException::class)override fun `acceptWelcome`(`welcomeJson`: kotlin.String)
+    @Throws(MdkUniffiException::class)override fun `acceptWelcome`(`welcome`: Welcome)
         = 
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_accept_welcome(
+        it,
+        FfiConverterTypeWelcome.lower(`welcome`),_status)
+}
+    }
+    
+    
+
+    
+    /**
+     * Accept a welcome message from JSON
+     */
+    @Throws(MdkUniffiException::class)override fun `acceptWelcomeJson`(`welcomeJson`: kotlin.String)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_accept_welcome_json(
         it,
         FfiConverterString.lower(`welcomeJson`),_status)
 }
@@ -1675,11 +1715,27 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Decline a welcome message
      */
-    @Throws(MdkUniffiException::class)override fun `declineWelcome`(`welcomeJson`: kotlin.String)
+    @Throws(MdkUniffiException::class)override fun `declineWelcome`(`welcome`: Welcome)
         = 
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_decline_welcome(
+        it,
+        FfiConverterTypeWelcome.lower(`welcome`),_status)
+}
+    }
+    
+    
+
+    
+    /**
+     * Decline a welcome message from JSON
+     */
+    @Throws(MdkUniffiException::class)override fun `declineWelcomeJson`(`welcomeJson`: kotlin.String)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_decline_welcome_json(
         it,
         FfiConverterString.lower(`welcomeJson`),_status)
 }
