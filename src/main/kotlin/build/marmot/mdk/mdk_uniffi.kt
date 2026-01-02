@@ -766,7 +766,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_sync_group_metadata_from_mls(`ptr`:
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_update_group_data(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`update`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_func_decrypt_group_image(`encryptedData`: RustBuffer.ByValue,`imageKey`: RustBuffer.ByValue,`imageNonce`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_func_decrypt_group_image(`encryptedData`: RustBuffer.ByValue,`expectedHash`: RustBuffer.ByValue,`imageKey`: RustBuffer.ByValue,`imageNonce`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_func_derive_upload_keypair(`imageKey`: RustBuffer.ByValue,`version`: Short,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -893,7 +893,7 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 }
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
-    if (lib.uniffi_mdk_uniffi_checksum_func_decrypt_group_image() != 61134.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_func_decrypt_group_image() != 29409.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_func_derive_upload_keypair() != 45595.toShort()) {
@@ -3583,12 +3583,12 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
         /**
          * Decrypt group image
          */
-    @Throws(MdkUniffiException::class) fun `decryptGroupImage`(`encryptedData`: kotlin.ByteArray, `imageKey`: kotlin.ByteArray, `imageNonce`: kotlin.ByteArray): kotlin.ByteArray {
+    @Throws(MdkUniffiException::class) fun `decryptGroupImage`(`encryptedData`: kotlin.ByteArray, `expectedHash`: kotlin.ByteArray?, `imageKey`: kotlin.ByteArray, `imageNonce`: kotlin.ByteArray): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_func_decrypt_group_image(
     
-        FfiConverterByteArray.lower(`encryptedData`),FfiConverterByteArray.lower(`imageKey`),FfiConverterByteArray.lower(`imageNonce`),_status)
+        FfiConverterByteArray.lower(`encryptedData`),FfiConverterOptionalByteArray.lower(`expectedHash`),FfiConverterByteArray.lower(`imageKey`),FfiConverterByteArray.lower(`imageNonce`),_status)
 }
     )
     }
