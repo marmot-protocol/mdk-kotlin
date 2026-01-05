@@ -672,6 +672,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes_paginated(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_relays(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_welcome(
@@ -743,6 +745,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`eventId`: 
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes_paginated(`ptr`: Long,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_relays(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -945,6 +949,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes() != 45023.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes_paginated() != 62033.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_relays() != 55523.toShort()) {
@@ -1455,6 +1462,20 @@ public interface MdkInterface {
     fun `getPendingWelcomes`(): List<Welcome>
     
     /**
+     * Get pending welcomes with pagination
+     *
+     * # Arguments
+     *
+     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000)
+     * * `offset` - Optional number of welcomes to skip (defaults to 0)
+     *
+     * # Returns
+     *
+     * Returns a vector of pending welcomes ordered by ID (descending)
+     */
+    fun `getPendingWelcomesPaginated`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome>
+    
+    /**
      * Get relays for a group
      */
     fun `getRelays`(`mlsGroupId`: kotlin.String): List<kotlin.String>
@@ -1839,6 +1860,32 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(
         it,
         _status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Get pending welcomes with pagination
+     *
+     * # Arguments
+     *
+     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000)
+     * * `offset` - Optional number of welcomes to skip (defaults to 0)
+     *
+     * # Returns
+     *
+     * Returns a vector of pending welcomes ordered by ID (descending)
+     */
+    @Throws(MdkUniffiException::class)override fun `getPendingWelcomesPaginated`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome> {
+            return FfiConverterSequenceTypeWelcome.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes_paginated(
+        it,
+        FfiConverterOptionalUInt.lower(`limit`),FfiConverterOptionalUInt.lower(`offset`),_status)
 }
     }
     )
@@ -3120,6 +3167,38 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
 }
 
 
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
+    override fun read(buf: ByteBuffer): kotlin.UInt? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUInt.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.UInt?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterUInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.UInt?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUInt.write(value, buf)
+        }
+    }
+}
 
 
 
