@@ -672,8 +672,6 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes(
     ): Short
-    external fun uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes_paginated(
-    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_relays(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_welcome(
@@ -744,9 +742,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`eventId`: 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes_paginated(`ptr`: Long,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_relays(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -948,10 +944,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 34303.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes() != 45023.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes_paginated() != 62033.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes() != 31211.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_relays() != 55523.toShort()) {
@@ -1457,23 +1450,18 @@ public interface MdkInterface {
     fun `getMessages`(`mlsGroupId`: kotlin.String): List<Message>
     
     /**
-     * Get pending welcomes
-     */
-    fun `getPendingWelcomes`(): List<Welcome>
-    
-    /**
-     * Get pending welcomes with pagination
+     * Get pending welcomes with optional pagination
      *
      * # Arguments
      *
-     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000)
-     * * `offset` - Optional number of welcomes to skip (defaults to 0)
+     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000 if None)
+     * * `offset` - Optional number of welcomes to skip (defaults to 0 if None)
      *
      * # Returns
      *
      * Returns a vector of pending welcomes ordered by ID (descending)
      */
-    fun `getPendingWelcomesPaginated`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome>
+    fun `getPendingWelcomes`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome>
     
     /**
      * Get relays for a group
@@ -1851,39 +1839,22 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
-     * Get pending welcomes
-     */
-    @Throws(MdkUniffiException::class)override fun `getPendingWelcomes`(): List<Welcome> {
-            return FfiConverterSequenceTypeWelcome.lift(
-    callWithHandle {
-    uniffiRustCallWithError(MdkUniffiException) { _status ->
-    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(
-        it,
-        _status)
-}
-    }
-    )
-    }
-    
-
-    
-    /**
-     * Get pending welcomes with pagination
+     * Get pending welcomes with optional pagination
      *
      * # Arguments
      *
-     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000)
-     * * `offset` - Optional number of welcomes to skip (defaults to 0)
+     * * `limit` - Optional maximum number of welcomes to return (defaults to 1000 if None)
+     * * `offset` - Optional number of welcomes to skip (defaults to 0 if None)
      *
      * # Returns
      *
      * Returns a vector of pending welcomes ordered by ID (descending)
      */
-    @Throws(MdkUniffiException::class)override fun `getPendingWelcomesPaginated`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome> {
+    @Throws(MdkUniffiException::class)override fun `getPendingWelcomes`(`limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Welcome> {
             return FfiConverterSequenceTypeWelcome.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
-    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes_paginated(
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(
         it,
         FfiConverterOptionalUInt.lower(`limit`),FfiConverterOptionalUInt.lower(`offset`),_status)
 }
