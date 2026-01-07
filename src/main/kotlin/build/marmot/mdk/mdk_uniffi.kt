@@ -740,7 +740,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_members(`ptr`: Long,`mlsGroupId
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -941,7 +941,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_message() != 52354.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 34303.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 36057.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes() != 31211.toShort()) {
@@ -1445,9 +1445,19 @@ public interface MdkInterface {
     fun `getMessage`(`eventId`: kotlin.String): Message?
     
     /**
-     * Get messages for a group
+     * Get messages for a group with optional pagination
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `limit` - Optional maximum number of messages to return (defaults to 1000 if None)
+     * * `offset` - Optional number of messages to skip (defaults to 0 if None)
+     *
+     * # Returns
+     *
+     * Returns a vector of messages ordered by creation time
      */
-    fun `getMessages`(`mlsGroupId`: kotlin.String): List<Message>
+    fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Message>
     
     /**
      * Get pending welcomes with optional pagination
@@ -1822,15 +1832,25 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
-     * Get messages for a group
+     * Get messages for a group with optional pagination
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `limit` - Optional maximum number of messages to return (defaults to 1000 if None)
+     * * `offset` - Optional number of messages to skip (defaults to 0 if None)
+     *
+     * # Returns
+     *
+     * Returns a vector of messages ordered by creation time
      */
-    @Throws(MdkUniffiException::class)override fun `getMessages`(`mlsGroupId`: kotlin.String): List<Message> {
+    @Throws(MdkUniffiException::class)override fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Message> {
             return FfiConverterSequenceTypeMessage.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_messages(
         it,
-        FfiConverterString.lower(`mlsGroupId`),_status)
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterOptionalUInt.lower(`limit`),FfiConverterOptionalUInt.lower(`offset`),_status)
 }
     }
     )
