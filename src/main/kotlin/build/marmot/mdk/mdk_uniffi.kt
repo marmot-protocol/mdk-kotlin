@@ -2999,13 +2999,28 @@ sealed class ProcessMessageResult {
     }
     
     /**
-     * A proposal message (add/remove member proposal)
+     * A proposal message that was auto-committed by an admin receiver
      */
     data class Proposal(
         /**
          * The proposal result containing evolution event and welcome rumors
          */
         val `result`: UpdateGroupResult) : ProcessMessageResult()
+        
+    {
+        
+
+        companion object
+    }
+    
+    /**
+     * A pending proposal stored but not committed (receiver is not admin)
+     */
+    data class PendingProposal(
+        /**
+         * Hex-encoded MLS group ID this pending proposal belongs to
+         */
+        val `mlsGroupId`: kotlin.String) : ProcessMessageResult()
         
     {
         
@@ -3058,6 +3073,25 @@ sealed class ProcessMessageResult {
         companion object
     }
     
+    /**
+     * Proposal was ignored and not stored
+     */
+    data class IgnoredProposal(
+        /**
+         * Hex-encoded MLS group ID this proposal was for
+         */
+        val `mlsGroupId`: kotlin.String, 
+        /**
+         * Reason the proposal was ignored
+         */
+        val `reason`: kotlin.String) : ProcessMessageResult()
+        
+    {
+        
+
+        companion object
+    }
+    
 
     
     companion object
@@ -3075,13 +3109,20 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
             2 -> ProcessMessageResult.Proposal(
                 FfiConverterTypeUpdateGroupResult.read(buf),
                 )
-            3 -> ProcessMessageResult.ExternalJoinProposal(
+            3 -> ProcessMessageResult.PendingProposal(
                 FfiConverterString.read(buf),
                 )
-            4 -> ProcessMessageResult.Commit(
+            4 -> ProcessMessageResult.ExternalJoinProposal(
                 FfiConverterString.read(buf),
                 )
-            5 -> ProcessMessageResult.Unprocessable(
+            5 -> ProcessMessageResult.Commit(
+                FfiConverterString.read(buf),
+                )
+            6 -> ProcessMessageResult.Unprocessable(
+                FfiConverterString.read(buf),
+                )
+            7 -> ProcessMessageResult.IgnoredProposal(
+                FfiConverterString.read(buf),
                 FfiConverterString.read(buf),
                 )
             else -> throw RuntimeException("invalid enum value, something is very wrong!!")
@@ -3101,6 +3142,13 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
             (
                 4UL
                 + FfiConverterTypeUpdateGroupResult.allocationSize(value.`result`)
+            )
+        }
+        is ProcessMessageResult.PendingProposal -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`mlsGroupId`)
             )
         }
         is ProcessMessageResult.ExternalJoinProposal -> {
@@ -3124,6 +3172,14 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 + FfiConverterString.allocationSize(value.`mlsGroupId`)
             )
         }
+        is ProcessMessageResult.IgnoredProposal -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`mlsGroupId`)
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+        }
     }
 
     override fun write(value: ProcessMessageResult, buf: ByteBuffer) {
@@ -3138,19 +3194,30 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 FfiConverterTypeUpdateGroupResult.write(value.`result`, buf)
                 Unit
             }
-            is ProcessMessageResult.ExternalJoinProposal -> {
+            is ProcessMessageResult.PendingProposal -> {
                 buf.putInt(3)
                 FfiConverterString.write(value.`mlsGroupId`, buf)
                 Unit
             }
-            is ProcessMessageResult.Commit -> {
+            is ProcessMessageResult.ExternalJoinProposal -> {
                 buf.putInt(4)
                 FfiConverterString.write(value.`mlsGroupId`, buf)
                 Unit
             }
-            is ProcessMessageResult.Unprocessable -> {
+            is ProcessMessageResult.Commit -> {
                 buf.putInt(5)
                 FfiConverterString.write(value.`mlsGroupId`, buf)
+                Unit
+            }
+            is ProcessMessageResult.Unprocessable -> {
+                buf.putInt(6)
+                FfiConverterString.write(value.`mlsGroupId`, buf)
+                Unit
+            }
+            is ProcessMessageResult.IgnoredProposal -> {
+                buf.putInt(7)
+                FfiConverterString.write(value.`mlsGroupId`, buf)
+                FfiConverterString.write(value.`reason`, buf)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
