@@ -742,7 +742,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_groups(`ptr`: Long,uniffi_out_e
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_members(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -952,7 +952,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_members() != 9763.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_message() != 52354.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_message() != 47057.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 36057.toShort()) {
@@ -1454,9 +1454,18 @@ public interface MdkInterface {
     fun `getMembers`(`mlsGroupId`: kotlin.String): List<kotlin.String>
     
     /**
-     * Get a message by event ID
+     * Get a message by event ID within a specific group
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - The MLS group ID the message belongs to (hex-encoded)
+     * * `event_id` - The Nostr event ID to look up (hex-encoded)
+     *
+     * # Returns
+     *
+     * Returns the message if found, None otherwise
      */
-    fun `getMessage`(`eventId`: kotlin.String): Message?
+    fun `getMessage`(`mlsGroupId`: kotlin.String, `eventId`: kotlin.String): Message?
     
     /**
      * Get messages for a group with optional pagination
@@ -1829,15 +1838,24 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
-     * Get a message by event ID
+     * Get a message by event ID within a specific group
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - The MLS group ID the message belongs to (hex-encoded)
+     * * `event_id` - The Nostr event ID to look up (hex-encoded)
+     *
+     * # Returns
+     *
+     * Returns the message if found, None otherwise
      */
-    @Throws(MdkUniffiException::class)override fun `getMessage`(`eventId`: kotlin.String): Message? {
+    @Throws(MdkUniffiException::class)override fun `getMessage`(`mlsGroupId`: kotlin.String, `eventId`: kotlin.String): Message? {
             return FfiConverterOptionalTypeMessage.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_message(
         it,
-        FfiConverterString.lower(`eventId`),_status)
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterString.lower(`eventId`),_status)
 }
     }
     )
