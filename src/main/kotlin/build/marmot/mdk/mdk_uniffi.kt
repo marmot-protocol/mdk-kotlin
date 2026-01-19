@@ -774,11 +774,11 @@ external fun uniffi_mdk_uniffi_fn_func_decrypt_group_image(`encryptedData`: Rust
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_func_derive_upload_keypair(`imageKey`: RustBuffer.ByValue,`version`: Short,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_func_new_mdk(`dbPath`: RustBuffer.ByValue,`serviceId`: RustBuffer.ByValue,`dbKeyId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_func_new_mdk(`dbPath`: RustBuffer.ByValue,`serviceId`: RustBuffer.ByValue,`dbKeyId`: RustBuffer.ByValue,`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
-external fun uniffi_mdk_uniffi_fn_func_new_mdk_unencrypted(`dbPath`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_func_new_mdk_unencrypted(`dbPath`: RustBuffer.ByValue,`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
-external fun uniffi_mdk_uniffi_fn_func_new_mdk_with_key(`dbPath`: RustBuffer.ByValue,`encryptionKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_func_new_mdk_with_key(`dbPath`: RustBuffer.ByValue,`encryptionKey`: RustBuffer.ByValue,`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
 external fun uniffi_mdk_uniffi_fn_func_prepare_group_image_for_upload(`imageData`: RustBuffer.ByValue,`mimeType`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -907,13 +907,13 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_func_derive_upload_keypair() != 45595.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk() != 45127.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk() != 40772.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk_unencrypted() != 60821.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk_unencrypted() != 29834.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk_with_key() != 40953.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_func_new_mdk_with_key() != 29974.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_func_prepare_group_image_for_upload() != 65092.toShort()) {
@@ -2595,6 +2595,76 @@ public object FfiConverterTypeKeyPackageResult: FfiConverterRustBuffer<KeyPackag
 
 
 /**
+ * Configuration for MDK behavior
+ *
+ * This struct allows customization of various MDK parameters including
+ * message validation and MLS sender ratchet settings. All fields are optional
+ * and default to sensible values when not provided.
+ */
+data class MdkConfig (
+    /**
+     * Maximum age for accepted events in seconds.
+     * Default: 3888000 (45 days)
+     */
+    var `maxEventAgeSecs`: kotlin.ULong?
+    , 
+    /**
+     * Maximum future timestamp skew allowed in seconds.
+     * Default: 300 (5 minutes)
+     */
+    var `maxFutureSkewSecs`: kotlin.ULong?
+    , 
+    /**
+     * Number of past message decryption secrets to retain for out-of-order delivery.
+     * Higher values improve tolerance for reordered messages but reduce forward secrecy.
+     * Default: 100
+     */
+    var `outOfOrderTolerance`: kotlin.UInt?
+    , 
+    /**
+     * Maximum number of messages that can be skipped before decryption fails.
+     * Default: 1000
+     */
+    var `maximumForwardDistance`: kotlin.UInt?
+    
+){
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
+    override fun read(buf: ByteBuffer): MdkConfig {
+        return MdkConfig(
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MdkConfig) = (
+            FfiConverterOptionalULong.allocationSize(value.`maxEventAgeSecs`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxFutureSkewSecs`) +
+            FfiConverterOptionalUInt.allocationSize(value.`outOfOrderTolerance`) +
+            FfiConverterOptionalUInt.allocationSize(value.`maximumForwardDistance`)
+    )
+
+    override fun write(value: MdkConfig, buf: ByteBuffer) {
+            FfiConverterOptionalULong.write(value.`maxEventAgeSecs`, buf)
+            FfiConverterOptionalULong.write(value.`maxFutureSkewSecs`, buf)
+            FfiConverterOptionalUInt.write(value.`outOfOrderTolerance`, buf)
+            FfiConverterOptionalUInt.write(value.`maximumForwardDistance`, buf)
+    }
+}
+
+
+
+/**
  * Message representation
  */
 data class Message (
@@ -3456,6 +3526,38 @@ public object FfiConverterOptionalTypeImageDimensions: FfiConverterRustBuffer<Im
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeMdkConfig: FfiConverterRustBuffer<MdkConfig?> {
+    override fun read(buf: ByteBuffer): MdkConfig? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeMdkConfig.read(buf)
+    }
+
+    override fun allocationSize(value: MdkConfig?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeMdkConfig.allocationSize(value)
+        }
+    }
+
+    override fun write(value: MdkConfig?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeMdkConfig.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeMessage: FfiConverterRustBuffer<Message?> {
     override fun read(buf: ByteBuffer): Message? {
         if (buf.get().toInt() == 0) {
@@ -3799,6 +3901,7 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
          * * `db_path` - Path to the SQLite database file
          * * `service_id` - A stable, host-defined application identifier (e.g., "com.example.myapp")
          * * `db_key_id` - A stable identifier for this database's key (e.g., "mdk.db.key.default")
+         * * `config` - Optional MDK configuration. If None, uses default configuration.
          *
          * # Errors
          *
@@ -3807,12 +3910,12 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
          * - The keyring is unavailable or inaccessible
          * - The database cannot be opened or created
          */
-    @Throws(MdkUniffiException::class) fun `newMdk`(`dbPath`: kotlin.String, `serviceId`: kotlin.String, `dbKeyId`: kotlin.String): Mdk {
+    @Throws(MdkUniffiException::class) fun `newMdk`(`dbPath`: kotlin.String, `serviceId`: kotlin.String, `dbKeyId`: kotlin.String, `config`: MdkConfig?): Mdk {
             return FfiConverterTypeMdk.lift(
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_func_new_mdk(
     
-        FfiConverterString.lower(`dbPath`),FfiConverterString.lower(`serviceId`),FfiConverterString.lower(`dbKeyId`),_status)
+        FfiConverterString.lower(`dbPath`),FfiConverterString.lower(`serviceId`),FfiConverterString.lower(`dbKeyId`),FfiConverterOptionalTypeMdkConfig.lower(`config`),_status)
 }
     )
     }
@@ -3826,13 +3929,18 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
          *
          * Only use this for development or testing. For production use, use `new_mdk`
          * with an encryption key.
+         *
+         * # Arguments
+         *
+         * * `db_path` - Path to the SQLite database file
+         * * `config` - Optional MDK configuration. If None, uses default configuration.
          */
-    @Throws(MdkUniffiException::class) fun `newMdkUnencrypted`(`dbPath`: kotlin.String): Mdk {
+    @Throws(MdkUniffiException::class) fun `newMdkUnencrypted`(`dbPath`: kotlin.String, `config`: MdkConfig?): Mdk {
             return FfiConverterTypeMdk.lift(
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_func_new_mdk_unencrypted(
     
-        FfiConverterString.lower(`dbPath`),_status)
+        FfiConverterString.lower(`dbPath`),FfiConverterOptionalTypeMdkConfig.lower(`config`),_status)
 }
     )
     }
@@ -3849,17 +3957,18 @@ public object FfiConverterSequenceSequenceString: FfiConverterRustBuffer<List<Li
          *
          * * `db_path` - Path to the SQLite database file
          * * `encryption_key` - 32-byte encryption key (must be exactly 32 bytes)
+         * * `config` - Optional MDK configuration. If None, uses default configuration.
          *
          * # Errors
          *
          * Returns an error if the key is not 32 bytes or if the database cannot be opened.
          */
-    @Throws(MdkUniffiException::class) fun `newMdkWithKey`(`dbPath`: kotlin.String, `encryptionKey`: kotlin.ByteArray): Mdk {
+    @Throws(MdkUniffiException::class) fun `newMdkWithKey`(`dbPath`: kotlin.String, `encryptionKey`: kotlin.ByteArray, `config`: MdkConfig?): Mdk {
             return FfiConverterTypeMdk.lift(
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_func_new_mdk_with_key(
     
-        FfiConverterString.lower(`dbPath`),FfiConverterByteArray.lower(`encryptionKey`),_status)
+        FfiConverterString.lower(`dbPath`),FfiConverterByteArray.lower(`encryptionKey`),FfiConverterOptionalTypeMdkConfig.lower(`config`),_status)
 }
     )
     }
