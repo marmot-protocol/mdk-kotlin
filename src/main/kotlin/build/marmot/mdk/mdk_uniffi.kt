@@ -2626,6 +2626,19 @@ data class MdkConfig (
      * Default: 1000
      */
     var `maximumForwardDistance`: kotlin.UInt?
+    , 
+    /**
+     * Number of epoch snapshots to retain for rollback support.
+     * Default: 5
+     */
+    var `epochSnapshotRetention`: kotlin.UInt?
+    , 
+    /**
+     * Time-to-live for snapshots in seconds.
+     * Snapshots older than this will be pruned on startup.
+     * Default: 604800 (1 week)
+     */
+    var `snapshotTtlSeconds`: kotlin.ULong?
     
 ){
     
@@ -2644,6 +2657,8 @@ public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalUInt.read(buf),
             FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalULong.read(buf),
         )
     }
 
@@ -2651,7 +2666,9 @@ public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
             FfiConverterOptionalULong.allocationSize(value.`maxEventAgeSecs`) +
             FfiConverterOptionalULong.allocationSize(value.`maxFutureSkewSecs`) +
             FfiConverterOptionalUInt.allocationSize(value.`outOfOrderTolerance`) +
-            FfiConverterOptionalUInt.allocationSize(value.`maximumForwardDistance`)
+            FfiConverterOptionalUInt.allocationSize(value.`maximumForwardDistance`) +
+            FfiConverterOptionalUInt.allocationSize(value.`epochSnapshotRetention`) +
+            FfiConverterOptionalULong.allocationSize(value.`snapshotTtlSeconds`)
     )
 
     override fun write(value: MdkConfig, buf: ByteBuffer) {
@@ -2659,6 +2676,8 @@ public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
             FfiConverterOptionalULong.write(value.`maxFutureSkewSecs`, buf)
             FfiConverterOptionalUInt.write(value.`outOfOrderTolerance`, buf)
             FfiConverterOptionalUInt.write(value.`maximumForwardDistance`, buf)
+            FfiConverterOptionalUInt.write(value.`epochSnapshotRetention`, buf)
+            FfiConverterOptionalULong.write(value.`snapshotTtlSeconds`, buf)
     }
 }
 
