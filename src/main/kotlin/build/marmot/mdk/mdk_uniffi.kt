@@ -2718,9 +2718,9 @@ data class Message (
     var `eventJson`: kotlin.String
     , 
     /**
-     * Timestamp when message was processed (Unix timestamp)
+     * Timestamp when message was created (Unix timestamp)
      */
-    var `processedAt`: kotlin.ULong
+    var `createdAt`: kotlin.ULong
     , 
     /**
      * Message kind
@@ -2764,7 +2764,7 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
             FfiConverterString.allocationSize(value.`eventId`) +
             FfiConverterString.allocationSize(value.`senderPubkey`) +
             FfiConverterString.allocationSize(value.`eventJson`) +
-            FfiConverterULong.allocationSize(value.`processedAt`) +
+            FfiConverterULong.allocationSize(value.`createdAt`) +
             FfiConverterUShort.allocationSize(value.`kind`) +
             FfiConverterString.allocationSize(value.`state`)
     )
@@ -2776,7 +2776,7 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
             FfiConverterString.write(value.`eventId`, buf)
             FfiConverterString.write(value.`senderPubkey`, buf)
             FfiConverterString.write(value.`eventJson`, buf)
-            FfiConverterULong.write(value.`processedAt`, buf)
+            FfiConverterULong.write(value.`createdAt`, buf)
             FfiConverterUShort.write(value.`kind`, buf)
             FfiConverterString.write(value.`state`, buf)
     }
