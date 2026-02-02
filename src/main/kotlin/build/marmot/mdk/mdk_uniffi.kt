@@ -3213,6 +3213,16 @@ sealed class ProcessMessageResult {
         companion object
     }
     
+    /**
+     * Message was previously marked as failed and cannot be reprocessed
+     *
+     * This is returned when attempting to process a message that previously
+     * failed. Unlike throwing an error, this allows clients to handle the
+     * case gracefully without crashing.
+     */
+    object PreviouslyFailed : ProcessMessageResult()
+    
+    
 
     
     companion object
@@ -3246,6 +3256,7 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 FfiConverterString.read(buf),
                 FfiConverterString.read(buf),
                 )
+            8 -> ProcessMessageResult.PreviouslyFailed
             else -> throw RuntimeException("invalid enum value, something is very wrong!!")
         }
     }
@@ -3301,6 +3312,12 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 + FfiConverterString.allocationSize(value.`reason`)
             )
         }
+        is ProcessMessageResult.PreviouslyFailed -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
     }
 
     override fun write(value: ProcessMessageResult, buf: ByteBuffer) {
@@ -3339,6 +3356,10 @@ public object FfiConverterTypeProcessMessageResult : FfiConverterRustBuffer<Proc
                 buf.putInt(7)
                 FfiConverterString.write(value.`mlsGroupId`, buf)
                 FfiConverterString.write(value.`reason`, buf)
+                Unit
+            }
+            is ProcessMessageResult.PreviouslyFailed -> {
+                buf.putInt(8)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
