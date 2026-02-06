@@ -2235,9 +2235,18 @@ data class Group (
     var `lastMessageId`: kotlin.String?
     , 
     /**
-     * Timestamp of last message (Unix timestamp)
+     * Timestamp of last message (Unix timestamp, sender's `created_at`)
      */
     var `lastMessageAt`: kotlin.ULong?
+    , 
+    /**
+     * Timestamp when the last message was processed/received (Unix timestamp)
+     *
+     * This differs from `last_message_at` which reflects the sender's timestamp.
+     * `last_message_processed_at` reflects when this client received the message,
+     * which may differ due to network delays or clock skew.
+     */
+    var `lastMessageProcessedAt`: kotlin.ULong?
     , 
     /**
      * Current epoch number
@@ -2272,6 +2281,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterSequenceString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
         )
@@ -2288,6 +2298,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterSequenceString.allocationSize(value.`adminPubkeys`) +
             FfiConverterOptionalString.allocationSize(value.`lastMessageId`) +
             FfiConverterOptionalULong.allocationSize(value.`lastMessageAt`) +
+            FfiConverterOptionalULong.allocationSize(value.`lastMessageProcessedAt`) +
             FfiConverterULong.allocationSize(value.`epoch`) +
             FfiConverterString.allocationSize(value.`state`)
     )
@@ -2303,6 +2314,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterSequenceString.write(value.`adminPubkeys`, buf)
             FfiConverterOptionalString.write(value.`lastMessageId`, buf)
             FfiConverterOptionalULong.write(value.`lastMessageAt`, buf)
+            FfiConverterOptionalULong.write(value.`lastMessageProcessedAt`, buf)
             FfiConverterULong.write(value.`epoch`, buf)
             FfiConverterString.write(value.`state`, buf)
     }
@@ -2718,9 +2730,18 @@ data class Message (
     var `eventJson`: kotlin.String
     , 
     /**
-     * Timestamp when message was created (Unix timestamp)
+     * Timestamp when message was created by the sender (Unix timestamp).
+     * Note: This timestamp comes from the sender's device and may differ
+     * from `processed_at` due to clock skew between devices.
      */
     var `createdAt`: kotlin.ULong
+    , 
+    /**
+     * Timestamp when this client processed/received the message (Unix timestamp).
+     * This is useful for clients that want to display messages in the order
+     * they were received locally, rather than in the order they were created.
+     */
+    var `processedAt`: kotlin.ULong
     , 
     /**
      * Message kind
@@ -2752,6 +2773,7 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
             FfiConverterUShort.read(buf),
             FfiConverterString.read(buf),
         )
@@ -2765,6 +2787,7 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
             FfiConverterString.allocationSize(value.`senderPubkey`) +
             FfiConverterString.allocationSize(value.`eventJson`) +
             FfiConverterULong.allocationSize(value.`createdAt`) +
+            FfiConverterULong.allocationSize(value.`processedAt`) +
             FfiConverterUShort.allocationSize(value.`kind`) +
             FfiConverterString.allocationSize(value.`state`)
     )
@@ -2777,6 +2800,7 @@ public object FfiConverterTypeMessage: FfiConverterRustBuffer<Message> {
             FfiConverterString.write(value.`senderPubkey`, buf)
             FfiConverterString.write(value.`eventJson`, buf)
             FfiConverterULong.write(value.`createdAt`, buf)
+            FfiConverterULong.write(value.`processedAt`, buf)
             FfiConverterUShort.write(value.`kind`, buf)
             FfiConverterString.write(value.`state`, buf)
     }
