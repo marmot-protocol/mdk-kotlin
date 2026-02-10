@@ -670,6 +670,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_groups(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_get_last_message(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_members(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_message(
@@ -744,11 +746,13 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_group(`ptr`: Long,`mlsGroupId`:
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_groups(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_last_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`sortOrder`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_members(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_get_messages(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,`sortOrder`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,`limit`: RustBuffer.ByValue,`offset`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -956,13 +960,16 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_groups() != 20872.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_last_message() != 16338.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_members() != 9763.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_message() != 47057.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 36057.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_messages() != 47346.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_pending_welcomes() != 31211.toShort()) {
@@ -1497,6 +1504,24 @@ public interface MdkInterface {
     fun `getGroups`(): List<Group>
     
     /**
+     * Get the most recent message in a group according to the given sort order
+     *
+     * This is useful for clients that use `"processed_at_first"` sort order and need
+     * a "last message" value that is consistent with their `get_messages()` ordering.
+     * The cached `group.last_message_id` always reflects `"created_at_first"` ordering.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `sort_order` - Sort order: `"created_at_first"` or `"processed_at_first"`
+     *
+     * # Returns
+     *
+     * Returns the most recent message under the given ordering, or None if the group has no messages
+     */
+    fun `getLastMessage`(`mlsGroupId`: kotlin.String, `sortOrder`: kotlin.String): Message?
+    
+    /**
      * Get members of a group
      */
     fun `getMembers`(`mlsGroupId`: kotlin.String): List<kotlin.String>
@@ -1523,12 +1548,13 @@ public interface MdkInterface {
      * * `mls_group_id` - Hex-encoded MLS group ID
      * * `limit` - Optional maximum number of messages to return (defaults to 1000 if None)
      * * `offset` - Optional number of messages to skip (defaults to 0 if None)
+     * * `sort_order` - Optional sort order: `"created_at_first"` (default) or `"processed_at_first"`
      *
      * # Returns
      *
-     * Returns a vector of messages ordered by creation time
+     * Returns a vector of messages in the requested sort order
      */
-    fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Message>
+    fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?, `sortOrder`: kotlin.String?): List<Message>
     
     /**
      * Get pending welcomes with optional pagination
@@ -1899,6 +1925,36 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
+     * Get the most recent message in a group according to the given sort order
+     *
+     * This is useful for clients that use `"processed_at_first"` sort order and need
+     * a "last message" value that is consistent with their `get_messages()` ordering.
+     * The cached `group.last_message_id` always reflects `"created_at_first"` ordering.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `sort_order` - Sort order: `"created_at_first"` or `"processed_at_first"`
+     *
+     * # Returns
+     *
+     * Returns the most recent message under the given ordering, or None if the group has no messages
+     */
+    @Throws(MdkUniffiException::class)override fun `getLastMessage`(`mlsGroupId`: kotlin.String, `sortOrder`: kotlin.String): Message? {
+            return FfiConverterOptionalTypeMessage.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_last_message(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterString.lower(`sortOrder`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Get members of a group
      */
     @Throws(MdkUniffiException::class)override fun `getMembers`(`mlsGroupId`: kotlin.String): List<kotlin.String> {
@@ -1949,18 +2005,19 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
      * * `mls_group_id` - Hex-encoded MLS group ID
      * * `limit` - Optional maximum number of messages to return (defaults to 1000 if None)
      * * `offset` - Optional number of messages to skip (defaults to 0 if None)
+     * * `sort_order` - Optional sort order: `"created_at_first"` (default) or `"processed_at_first"`
      *
      * # Returns
      *
-     * Returns a vector of messages ordered by creation time
+     * Returns a vector of messages in the requested sort order
      */
-    @Throws(MdkUniffiException::class)override fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?): List<Message> {
+    @Throws(MdkUniffiException::class)override fun `getMessages`(`mlsGroupId`: kotlin.String, `limit`: kotlin.UInt?, `offset`: kotlin.UInt?, `sortOrder`: kotlin.String?): List<Message> {
             return FfiConverterSequenceTypeMessage.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_get_messages(
         it,
-        FfiConverterString.lower(`mlsGroupId`),FfiConverterOptionalUInt.lower(`limit`),FfiConverterOptionalUInt.lower(`offset`),_status)
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterOptionalUInt.lower(`limit`),FfiConverterOptionalUInt.lower(`offset`),FfiConverterOptionalString.lower(`sortOrder`),_status)
 }
     }
     )
