@@ -658,6 +658,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_message(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome(
@@ -729,6 +731,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_add_members(`ptr`: Long,`mlsGroupId
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPublicKey`: RustBuffer.ByValue,`memberKeyPackageEventsJson`: RustBuffer.ByValue,`name`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`admins`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`protected`: Byte,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`senderPublicKey`: RustBuffer.ByValue,`content`: RustBuffer.ByValue,`kind`: Short,`tags`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -931,7 +935,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_group() != 56895.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event() != 48232.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event() != 46847.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options() != 59356.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_message() != 58601.toShort()) {
@@ -1223,6 +1230,29 @@ public object FfiConverterULong: FfiConverter<ULong, Long> {
 /**
  * @suppress
  */
+public object FfiConverterBoolean: FfiConverter<Boolean, Byte> {
+    override fun lift(value: Byte): Boolean {
+        return value.toInt() != 0
+    }
+
+    override fun read(buf: ByteBuffer): Boolean {
+        return lift(buf.get())
+    }
+
+    override fun lower(value: Boolean): Byte {
+        return if (value) 1.toByte() else 0.toByte()
+    }
+
+    override fun allocationSize(value: Boolean) = 1UL
+
+    override fun write(value: Boolean, buf: ByteBuffer) {
+        buf.put(lower(value))
+    }
+}
+
+/**
+ * @suppress
+ */
 public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
     // Note: we don't inherit from FfiConverterRustBuffer, because we use a
     // special encoding when lowering/lifting.  We can use `RustBuffer.len` to
@@ -1420,8 +1450,26 @@ public interface MdkInterface {
     
     /**
      * Create a key package for a Nostr event
+     *
+     * This function does NOT add the NIP-70 protected tag, ensuring maximum relay
+     * compatibility. Many popular relays (Damus, Primal, nos.lol) reject protected events.
+     * If you need the protected tag, use `create_key_package_for_event_with_options` instead.
      */
     fun `createKeyPackageForEvent`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>): KeyPackageResult
+    
+    /**
+     * Create a key package for a Nostr event with additional options
+     *
+     * # Arguments
+     *
+     * * `public_key` - The Nostr public key (hex) for the credential
+     * * `relays` - Relay URLs where the key package will be published
+     * * `protected` - Whether to add the NIP-70 protected tag. When `true`, relays that
+     * implement NIP-70 will reject republishing by third parties. However, many popular
+     * relays reject protected events entirely. Set to `false` for maximum relay
+     * compatibility.
+     */
+    fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `protected`: kotlin.Boolean): KeyPackageResult
     
     /**
      * Create a message in a group
@@ -1722,6 +1770,10 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     
     /**
      * Create a key package for a Nostr event
+     *
+     * This function does NOT add the NIP-70 protected tag, ensuring maximum relay
+     * compatibility. Many popular relays (Damus, Primal, nos.lol) reject protected events.
+     * If you need the protected tag, use `create_key_package_for_event_with_options` instead.
      */
     @Throws(MdkUniffiException::class)override fun `createKeyPackageForEvent`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>): KeyPackageResult {
             return FfiConverterTypeKeyPackageResult.lift(
@@ -1730,6 +1782,32 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(
         it,
         FfiConverterString.lower(`publicKey`),FfiConverterSequenceString.lower(`relays`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Create a key package for a Nostr event with additional options
+     *
+     * # Arguments
+     *
+     * * `public_key` - The Nostr public key (hex) for the credential
+     * * `relays` - Relay URLs where the key package will be published
+     * * `protected` - Whether to add the NIP-70 protected tag. When `true`, relays that
+     * implement NIP-70 will reject republishing by third parties. However, many popular
+     * relays reject protected events entirely. Set to `false` for maximum relay
+     * compatibility.
+     */
+    @Throws(MdkUniffiException::class)override fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `protected`: kotlin.Boolean): KeyPackageResult {
+            return FfiConverterTypeKeyPackageResult.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(
+        it,
+        FfiConverterString.lower(`publicKey`),FfiConverterSequenceString.lower(`relays`),FfiConverterBoolean.lower(`protected`),_status)
 }
     }
     )
