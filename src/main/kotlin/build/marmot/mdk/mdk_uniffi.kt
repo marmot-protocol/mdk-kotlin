@@ -684,6 +684,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_welcome(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_groups_needing_self_update(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_leave_group(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_merge_pending_commit(
@@ -759,6 +761,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_pending_welcomes(`ptr`: Long,`l
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_relays(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_welcome(`ptr`: Long,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_groups_needing_self_update(`ptr`: Long,`thresholdSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_leave_group(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -979,6 +983,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_welcome() != 25012.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_groups_needing_self_update() != 16699.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_leave_group() != 46166.toShort()) {
@@ -1581,6 +1588,11 @@ public interface MdkInterface {
     fun `getWelcome`(`eventId`: kotlin.String): Welcome?
     
     /**
+     * Get group IDs that need a self-update (post-join or stale rotation).
+     */
+    fun `groupsNeedingSelfUpdate`(`thresholdSecs`: kotlin.ULong): List<kotlin.String>
+    
+    /**
      * Create a proposal to leave the group
      */
     fun `leaveGroup`(`mlsGroupId`: kotlin.String): UpdateGroupResult
@@ -2086,6 +2098,23 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
+     * Get group IDs that need a self-update (post-join or stale rotation).
+     */
+    @Throws(MdkUniffiException::class)override fun `groupsNeedingSelfUpdate`(`thresholdSecs`: kotlin.ULong): List<kotlin.String> {
+            return FfiConverterSequenceString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_groups_needing_self_update(
+        it,
+        FfiConverterULong.lower(`thresholdSecs`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Create a proposal to leave the group
      */
     @Throws(MdkUniffiException::class)override fun `leaveGroup`(`mlsGroupId`: kotlin.String): UpdateGroupResult {
@@ -2392,6 +2421,13 @@ data class Group (
      * Group state (e.g., "active", "archived")
      */
     var `state`: kotlin.String
+    , 
+    /**
+     * Self-update tracking state.
+     * - `"required"`: Must perform a post-join self-update (MIP-02).
+     * - `"completed_at:<unix_timestamp>"`: Last self-update merged at this time (MIP-00).
+     */
+    var `selfUpdateState`: kotlin.String
     
 ){
     
@@ -2419,6 +2455,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
         )
     }
 
@@ -2435,7 +2472,8 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterOptionalULong.allocationSize(value.`lastMessageAt`) +
             FfiConverterOptionalULong.allocationSize(value.`lastMessageProcessedAt`) +
             FfiConverterULong.allocationSize(value.`epoch`) +
-            FfiConverterString.allocationSize(value.`state`)
+            FfiConverterString.allocationSize(value.`state`) +
+            FfiConverterString.allocationSize(value.`selfUpdateState`)
     )
 
     override fun write(value: Group, buf: ByteBuffer) {
@@ -2452,6 +2490,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterOptionalULong.write(value.`lastMessageProcessedAt`, buf)
             FfiConverterULong.write(value.`epoch`, buf)
             FfiConverterString.write(value.`state`, buf)
+            FfiConverterString.write(value.`selfUpdateState`, buf)
     }
 }
 
@@ -2709,6 +2748,11 @@ data class KeyPackageResult (
      * JSON-encoded tags for the key package event
      */
     var `tags`: List<List<kotlin.String>>
+    , 
+    /**
+     * Serialized hash_ref bytes for the key package (for lifecycle tracking)
+     */
+    var `hashRef`: kotlin.ByteArray
     
 ){
     
@@ -2725,17 +2769,20 @@ public object FfiConverterTypeKeyPackageResult: FfiConverterRustBuffer<KeyPackag
         return KeyPackageResult(
             FfiConverterString.read(buf),
             FfiConverterSequenceSequenceString.read(buf),
+            FfiConverterByteArray.read(buf),
         )
     }
 
     override fun allocationSize(value: KeyPackageResult) = (
             FfiConverterString.allocationSize(value.`keyPackage`) +
-            FfiConverterSequenceSequenceString.allocationSize(value.`tags`)
+            FfiConverterSequenceSequenceString.allocationSize(value.`tags`) +
+            FfiConverterByteArray.allocationSize(value.`hashRef`)
     )
 
     override fun write(value: KeyPackageResult, buf: ByteBuffer) {
             FfiConverterString.write(value.`keyPackage`, buf)
             FfiConverterSequenceSequenceString.write(value.`tags`, buf)
+            FfiConverterByteArray.write(value.`hashRef`, buf)
     }
 }
 
