@@ -654,6 +654,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_add_members(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_clear_pending_commit(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_group(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event(
@@ -732,6 +734,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_accept_welcome_json(`ptr`: Long,`we
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_add_members(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`keyPackageEventsJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_clear_pending_commit(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPublicKey`: RustBuffer.ByValue,`memberKeyPackageEventsJson`: RustBuffer.ByValue,`name`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`admins`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -938,6 +942,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_add_members() != 19089.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_clear_pending_commit() != 50626.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_group() != 56895.toShort()) {
@@ -1458,6 +1465,21 @@ public interface MdkInterface {
     fun `addMembers`(`mlsGroupId`: kotlin.String, `keyPackageEventsJson`: List<kotlin.String>): UpdateGroupResult
     
     /**
+     * Clear pending commit for a group
+     *
+     * This rolls back the group to its pre-commit state — no epoch advance, no member changes.
+     * Call this when publish exhausts retries to recover from failed relay publishes.
+     *
+     * # Arguments
+     * * `mls_group_id` - The MLS group ID to clear the pending commit for (hex-encoded)
+     *
+     * # Returns
+     * * `Ok(())` - if the pending commit was cleared successfully
+     * * `Err` - if the group doesn't exist or another error occurs
+     */
+    fun `clearPendingCommit`(`mlsGroupId`: kotlin.String)
+    
+    /**
      * Create a new group
      */
     fun `createGroup`(`creatorPublicKey`: kotlin.String, `memberKeyPackageEventsJson`: List<kotlin.String>, `name`: kotlin.String, `description`: kotlin.String, `relays`: List<kotlin.String>, `admins`: List<kotlin.String>): CreateGroupResult
@@ -1786,6 +1808,32 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     }
     )
     }
+    
+
+    
+    /**
+     * Clear pending commit for a group
+     *
+     * This rolls back the group to its pre-commit state — no epoch advance, no member changes.
+     * Call this when publish exhausts retries to recover from failed relay publishes.
+     *
+     * # Arguments
+     * * `mls_group_id` - The MLS group ID to clear the pending commit for (hex-encoded)
+     *
+     * # Returns
+     * * `Ok(())` - if the pending commit was cleared successfully
+     * * `Err` - if the group doesn't exist or another error occurs
+     */
+    @Throws(MdkUniffiException::class)override fun `clearPendingCommit`(`mlsGroupId`: kotlin.String)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_clear_pending_commit(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),_status)
+}
+    }
+    
     
 
     
