@@ -83,7 +83,7 @@ open class RustBuffer : Structure() {
 
     @Suppress("TooGenericExceptionThrown")
     fun asByteBuffer() =
-        this.data?.getByteBuffer(0, this.len.toLong())?.also {
+        this.data?.getByteBuffer(0, this.len)?.also {
             it.order(ByteOrder.BIG_ENDIAN)
         }
 }
@@ -284,8 +284,9 @@ internal inline fun<T> uniffiTraitInterfaceCall(
     try {
         writeReturn(makeCall())
     } catch(e: kotlin.Exception) {
+        val err = try { e.stackTraceToString() } catch(_: Throwable) { "" }
         callStatus.code = UNIFFI_CALL_UNEXPECTED_ERROR
-        callStatus.error_buf = FfiConverterString.lower(e.toString())
+        callStatus.error_buf = FfiConverterString.lower(err)
     }
 }
 
@@ -302,8 +303,9 @@ internal inline fun<T, reified E: Throwable> uniffiTraitInterfaceCallWithError(
             callStatus.code = UNIFFI_CALL_ERROR
             callStatus.error_buf = lowerError(e)
         } else {
+            val err = try { e.stackTraceToString() } catch(_: Throwable) { "" }
             callStatus.code = UNIFFI_CALL_UNEXPECTED_ERROR
-            callStatus.error_buf = FfiConverterString.lower(e.toString())
+            callStatus.error_buf = FfiConverterString.lower(err)
         }
     }
 }
@@ -708,7 +710,7 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun ffi_mdk_uniffi_uniffi_contract_version(
     ): Int
-    
+
         
 }
 
@@ -1443,7 +1445,6 @@ public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
 //
 
 
-//
 /**
  * Main MDK instance with SQLite storage
  */
@@ -1687,11 +1688,11 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     @Suppress("UNUSED_PARAMETER")
     constructor(noHandle: NoHandle) {
         this.handle = 0
-        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+        this.cleanable = null
     }
 
     protected val handle: Long
-    protected val cleanable: UniffiCleaner.Cleanable
+    protected val cleanable: UniffiCleaner.Cleanable?
 
     private val wasDestroyed = AtomicBoolean(false)
     private val callCounter = AtomicLong(1)
@@ -1702,7 +1703,7 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
         if (this.wasDestroyed.compareAndSet(false, true)) {
             // This decrement always matches the initial count of 1 given at creation time.
             if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
+                cleanable?.clean()
             }
         }
     }
@@ -1730,7 +1731,7 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
         } finally {
             // This decrement always matches the increment we performed above.
             if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
+                cleanable?.clean()
             }
         }
     }
@@ -2370,6 +2371,8 @@ data class CreateGroupResult (
     
 
     
+
+    
     companion object
 }
 
@@ -2481,6 +2484,8 @@ data class Group (
     
 
     
+
+    
     companion object
 }
 
@@ -2587,6 +2592,8 @@ data class GroupDataUpdate (
     
 
     
+
+    
     companion object
 }
 
@@ -2687,6 +2694,8 @@ data class GroupImageUpload (
     
 
     
+
+    
     companion object
 }
 
@@ -2756,6 +2765,8 @@ data class ImageDimensions (
     
 
     
+
+    
     companion object
 }
 
@@ -2803,6 +2814,8 @@ data class KeyPackageResult (
     var `hashRef`: kotlin.ByteArray
     
 ){
+    
+
     
 
     
@@ -2883,6 +2896,8 @@ data class MdkConfig (
     var `snapshotTtlSeconds`: kotlin.ULong?
     
 ){
+    
+
     
 
     
@@ -2987,6 +3002,8 @@ data class Message (
     
 
     
+
+    
     companion object
 }
 
@@ -3058,6 +3075,8 @@ data class UpdateGroupResult (
     var `mlsGroupId`: kotlin.String
     
 ){
+    
+
     
 
     
@@ -3174,6 +3193,8 @@ data class Welcome (
     
 
     
+
+    
     companion object
 }
 
@@ -3281,6 +3302,9 @@ sealed class MdkUniffiException: kotlin.Exception() {
     }
     
 
+    
+
+
     companion object ErrorHandler : UniffiRustCallStatusErrorHandler<MdkUniffiException> {
         override fun lift(error_buf: RustBuffer.ByValue): MdkUniffiException = FfiConverterTypeMdkUniffiError.lift(error_buf)
     }
@@ -3365,7 +3389,7 @@ sealed class ProcessMessageResult {
         /**
          * The processed message
          */
-        val `message`: Message) : ProcessMessageResult()
+        val `message`: build.marmot.mdk.Message) : ProcessMessageResult()
         
     {
         
@@ -3380,7 +3404,7 @@ sealed class ProcessMessageResult {
         /**
          * The proposal result containing evolution event and welcome rumors
          */
-        val `result`: UpdateGroupResult) : ProcessMessageResult()
+        val `result`: build.marmot.mdk.UpdateGroupResult) : ProcessMessageResult()
         
     {
         
@@ -3479,6 +3503,11 @@ sealed class ProcessMessageResult {
     
 
     
+
+    
+    
+
+
     companion object
 }
 
