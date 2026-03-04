@@ -2,6 +2,8 @@
 
 ### Installation
 
+![marmot](https://blossom.primal.net/392245b37b513b93947a930bb18a75d170e5ddb0e455ec3d073994e6c445d1e7.png)
+
 Make sure you have jitpack enabled in your settings.gradle: 
 
 ```kotlin
@@ -25,6 +27,8 @@ to your build.gradle.kts
 
 ### Import and Initialize
 
+![marmot](https://blossom.primal.net/fbf39578e7bed162419c9c249a7ee18cbbaa68de8c8815359ca13428e7d74135.png)
+
 ```kotlin
 import build.marmot.mdk.*
 
@@ -34,6 +38,8 @@ val mdk = newMdk(dbPath)
 ```
 
 ### Create and Publish Key Package
+
+![marmot](https://blossom.primal.net/c1801b3637aaaf374ef729ae327e3566e1520784c54837adde89cc38f9912dd3.png)
 
 ```kotlin
 val publicKey = "your_hex_public_key"
@@ -87,6 +93,8 @@ embed in a standard Nostr event.
 
 ### Parse Key Packages
 
+![marmot](https://blossom.primal.net/3a93f1f2b773d1236edc50d3bec5d1160d77ad46847d67418913483102d36f5d.png)
+
 ```kotlin
 // When you receive a key package event from Nostr
 val eventJson = """
@@ -102,6 +110,8 @@ mdk.parseKeyPackage(eventJson = eventJson)
 ```
 
 ### Create a Group
+
+![marmot](https://blossom.primal.net/cedc0680b3a8f9b00cd527555ae770815f3a96f18775ce16d445457e7a4f6ae6.png)
 
 ```kotlin
 val creatorPublicKey = "your_hex_public_key"
@@ -203,6 +213,8 @@ val result = mdk.updateGroupMetadata(
 
 ### Accept Welcome Messages
 
+![marmot](https://blossom.primal.net/ec8bcff479764bd9f9df8d3aec106b348a653c35f4c4c6711745071f04f8aff2.png)
+
 ```kotlin
 // Get pending welcomes
 val welcomes = mdk.getPendingWelcomes()
@@ -224,6 +236,8 @@ mdk.declineWelcome(welcomeJson = welcome.eventJson)
 ```
 
 ### Create and Send Messages
+
+![marmot](https://blossom.primal.net/83d56f90973787858c085ab51cf2c4454134a2a6cdf98d996c464ea00f23baad.png)
 
 ```kotlin
 val mlsGroupId = "hex_group_id"
@@ -310,6 +324,8 @@ results.forEach { result ->
 
 ## Error Handling
 
+![marmot](https://blossom.primal.net/5d3892de07d242caa190e655e09c6501c450e15968a3c430df7c2c4752b461ab.png)
+
 All MDK operations can throw `MdkUniffiError`:
 
 ```kotlin
@@ -326,6 +342,8 @@ try {
 ```
 
 ## Data Types
+
+![marmot](https://blossom.primal.net/5f94fd8d54356223dfb54117ed20a978696737df822bcff22baa8df1c6662a69.png)
 
 ### Group
 
@@ -395,9 +413,13 @@ data class KeyPackageResult(
 
 ## Thread Safety
 
+![marmot](https://blossom.primal.net/aef8e66dd3557d1eba4f05d3278b0f269468a32a9182272d3d12f77b1854524c.png)
+
 A given `Mdk` instance must be confined to a single thread and must not be shared across threads. If you need to use MDK from multiple threads, create separate isolated `Mdk` instances per thread. Note that multi-threaded usage with separate instances is not a supported concurrency model.
 
 ## Android Integration
+
+![marmot](https://blossom.primal.net/8279fbcbd6f8eddd768a8a204eb984b9407a1a8893a9bf99e4933ba50a9376d4.png)
 
 ### Native Libraries
 
@@ -446,6 +468,8 @@ class MdkManager(private val context: Context) {
 ```
 
 ## Example: Complete Workflow
+
+![marmot](https://blossom.primal.net/49a2e700df6aadc7ee4a3b2a6b51e06f3de3ca3b6add5cf7ce3d8f39b5180d3e.png)
 
 ```kotlin
 import build.marmot.mdk.*
@@ -553,4 +577,3 @@ class GroupViewModel(
     }
 }
 ```
-
