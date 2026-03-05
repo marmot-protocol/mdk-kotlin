@@ -664,11 +664,19 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_create_media_imeta_tag(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_create_message(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome_json(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_decrypt_media_from_download(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_encrypt_media_for_upload(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_encrypt_media_for_upload_with_options(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_group(
     ): Short
@@ -695,6 +703,8 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_mdk_uniffi_checksum_method_mdk_merge_pending_commit(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_parse_key_package(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_parse_media_imeta_tag(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_process_message(
     ): Short
@@ -744,12 +754,20 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`:
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`protected`: Byte,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_create_media_imeta_tag(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`upload`: RustBuffer.ByValue,`uploadedUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_message(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`senderPublicKey`: RustBuffer.ByValue,`content`: RustBuffer.ByValue,`kind`: Short,`tags`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome(`ptr`: Long,`welcome`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_decline_welcome_json(`ptr`: Long,`welcomeJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
+external fun uniffi_mdk_uniffi_fn_method_mdk_decrypt_media_from_download(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`encryptedData`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_encrypt_media_for_upload(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`data`: RustBuffer.ByValue,`mimeType`: RustBuffer.ByValue,`filename`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_encrypt_media_for_upload_with_options(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`data`: RustBuffer.ByValue,`mimeType`: RustBuffer.ByValue,`filename`: RustBuffer.ByValue,`options`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_group(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_groups(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -775,6 +793,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_leave_group(`ptr`: Long,`mlsGroupId
 external fun uniffi_mdk_uniffi_fn_method_mdk_merge_pending_commit(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_parse_key_package(`ptr`: Long,`eventJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_parse_media_imeta_tag(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`imetaTag`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_process_message(`ptr`: Long,`eventJson`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -958,6 +978,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options() != 59356.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_media_imeta_tag() != 4917.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_message() != 58601.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -965,6 +988,15 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decline_welcome_json() != 21478.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_decrypt_media_from_download() != 48593.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_encrypt_media_for_upload() != 41485.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_encrypt_media_for_upload_with_options() != 55124.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_group() != 1495.toShort()) {
@@ -1004,6 +1036,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_parse_key_package() != 41870.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_parse_media_imeta_tag() != 60768.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_process_message() != 15589.toShort()) {
@@ -1509,6 +1544,22 @@ public interface MdkInterface {
     fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `protected`: kotlin.Boolean): KeyPackageResult
     
     /**
+     * Build an IMETA tag for an encrypted media upload
+     *
+     * Creates the IMETA Nostr tag per the MIP-04 specification. Attach this tag
+     * to the group message event after uploading the encrypted bytes to Blossom.
+     *
+     * Returns the tag as a `Vec<Vec<String>>` (the standard UniFFI tag format).
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `upload` - The result returned by `encrypt_media_for_upload`
+     * * `uploaded_url` - The URL returned by the Blossom server after upload
+     */
+    fun `createMediaImetaTag`(`mlsGroupId`: kotlin.String, `upload`: EncryptedMediaUploadResult, `uploadedUrl`: kotlin.String): List<List<kotlin.String>>
+    
+    /**
      * Create a message in a group
      */
     fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort, `tags`: List<List<kotlin.String>>?): kotlin.String
@@ -1522,6 +1573,61 @@ public interface MdkInterface {
      * Decline a welcome message from JSON
      */
     fun `declineWelcomeJson`(`welcomeJson`: kotlin.String)
+    
+    /**
+     * Decrypt media downloaded from a Blossom server
+     *
+     * Decrypts the encrypted bytes using the key derived from the group's MLS
+     * epoch that was active when the file was encrypted (looked up automatically
+     * via the epoch hint stored alongside the message). Falls back to the current
+     * epoch if no hint is available.
+     *
+     * The `reference` parameter is typically obtained by calling
+     * `parse_media_imeta_tag` on the IMETA tag attached to the message.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `encrypted_data` - Encrypted bytes downloaded from the Blossom server
+     * * `reference` - Parsed media reference (from `parse_media_imeta_tag`)
+     */
+    fun `decryptMediaFromDownload`(`mlsGroupId`: kotlin.String, `encryptedData`: kotlin.ByteArray, `reference`: MediaReferenceRecord): kotlin.ByteArray
+    
+    /**
+     * Encrypt media for upload using default processing options
+     *
+     * Encrypts the supplied media file with the group's current MLS epoch key,
+     * producing ciphertext ready to upload to a Blossom server. Images are
+     * automatically EXIF-sanitized and a blurhash preview is generated.
+     *
+     * After uploading the encrypted bytes, call `create_media_imeta_tag` with
+     * the returned result and the Blossom URL to build the IMETA tag to attach
+     * to the group message.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `data` - Raw media file bytes
+     * * `mime_type` - MIME type of the media (e.g. `"image/jpeg"`)
+     * * `filename` - Original filename (used as AAD in the encryption)
+     */
+    fun `encryptMediaForUpload`(`mlsGroupId`: kotlin.String, `data`: kotlin.ByteArray, `mimeType`: kotlin.String, `filename`: kotlin.String): EncryptedMediaUploadResult
+    
+    /**
+     * Encrypt media for upload with custom processing options
+     *
+     * Same as `encrypt_media_for_upload` but lets you override EXIF sanitization,
+     * blurhash generation, and size/dimension limits.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `data` - Raw media file bytes
+     * * `mime_type` - MIME type of the media (e.g. `"image/jpeg"`)
+     * * `filename` - Original filename (used as AAD in the encryption)
+     * * `options` - Custom processing options
+     */
+    fun `encryptMediaForUploadWithOptions`(`mlsGroupId`: kotlin.String, `data`: kotlin.ByteArray, `mimeType`: kotlin.String, `filename`: kotlin.String, `options`: MediaProcessingOptionsInput): EncryptedMediaUploadResult
     
     /**
      * Get a group by MLS group ID
@@ -1629,6 +1735,24 @@ public interface MdkInterface {
      * Parse a key package from a Nostr event
      */
     fun `parseKeyPackage`(`eventJson`: kotlin.String): kotlin.String
+    
+    /**
+     * Parse an IMETA tag into a `MediaReferenceRecord` for decryption
+     *
+     * Validates and decodes the IMETA tag fields according to the MIP-04
+     * specification. The returned record can be passed directly to
+     * `decrypt_media_from_download`.
+     *
+     * The tag must be provided as a single-element `Vec<Vec<String>>` — the
+     * same format returned by `create_media_imeta_tag` and the standard UniFFI
+     * tag wire format.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `imeta_tag` - IMETA tag as `Vec<Vec<String>>`
+     */
+    fun `parseMediaImetaTag`(`mlsGroupId`: kotlin.String, `imetaTag`: List<List<kotlin.String>>): MediaReferenceRecord
     
     /**
      * Process an incoming MLS message
@@ -1903,6 +2027,34 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
+     * Build an IMETA tag for an encrypted media upload
+     *
+     * Creates the IMETA Nostr tag per the MIP-04 specification. Attach this tag
+     * to the group message event after uploading the encrypted bytes to Blossom.
+     *
+     * Returns the tag as a `Vec<Vec<String>>` (the standard UniFFI tag format).
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `upload` - The result returned by `encrypt_media_for_upload`
+     * * `uploaded_url` - The URL returned by the Blossom server after upload
+     */
+    @Throws(MdkUniffiException::class)override fun `createMediaImetaTag`(`mlsGroupId`: kotlin.String, `upload`: EncryptedMediaUploadResult, `uploadedUrl`: kotlin.String): List<List<kotlin.String>> {
+            return FfiConverterSequenceSequenceString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_media_imeta_tag(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterTypeEncryptedMediaUploadResult.lower(`upload`),FfiConverterString.lower(`uploadedUrl`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Create a message in a group
      */
     @Throws(MdkUniffiException::class)override fun `createMessage`(`mlsGroupId`: kotlin.String, `senderPublicKey`: kotlin.String, `content`: kotlin.String, `kind`: kotlin.UShort, `tags`: List<List<kotlin.String>>?): kotlin.String {
@@ -1948,6 +2100,97 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 }
     }
     
+    
+
+    
+    /**
+     * Decrypt media downloaded from a Blossom server
+     *
+     * Decrypts the encrypted bytes using the key derived from the group's MLS
+     * epoch that was active when the file was encrypted (looked up automatically
+     * via the epoch hint stored alongside the message). Falls back to the current
+     * epoch if no hint is available.
+     *
+     * The `reference` parameter is typically obtained by calling
+     * `parse_media_imeta_tag` on the IMETA tag attached to the message.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `encrypted_data` - Encrypted bytes downloaded from the Blossom server
+     * * `reference` - Parsed media reference (from `parse_media_imeta_tag`)
+     */
+    @Throws(MdkUniffiException::class)override fun `decryptMediaFromDownload`(`mlsGroupId`: kotlin.String, `encryptedData`: kotlin.ByteArray, `reference`: MediaReferenceRecord): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_decrypt_media_from_download(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterByteArray.lower(`encryptedData`),FfiConverterTypeMediaReferenceRecord.lower(`reference`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Encrypt media for upload using default processing options
+     *
+     * Encrypts the supplied media file with the group's current MLS epoch key,
+     * producing ciphertext ready to upload to a Blossom server. Images are
+     * automatically EXIF-sanitized and a blurhash preview is generated.
+     *
+     * After uploading the encrypted bytes, call `create_media_imeta_tag` with
+     * the returned result and the Blossom URL to build the IMETA tag to attach
+     * to the group message.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `data` - Raw media file bytes
+     * * `mime_type` - MIME type of the media (e.g. `"image/jpeg"`)
+     * * `filename` - Original filename (used as AAD in the encryption)
+     */
+    @Throws(MdkUniffiException::class)override fun `encryptMediaForUpload`(`mlsGroupId`: kotlin.String, `data`: kotlin.ByteArray, `mimeType`: kotlin.String, `filename`: kotlin.String): EncryptedMediaUploadResult {
+            return FfiConverterTypeEncryptedMediaUploadResult.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_encrypt_media_for_upload(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterByteArray.lower(`data`),FfiConverterString.lower(`mimeType`),FfiConverterString.lower(`filename`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Encrypt media for upload with custom processing options
+     *
+     * Same as `encrypt_media_for_upload` but lets you override EXIF sanitization,
+     * blurhash generation, and size/dimension limits.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `data` - Raw media file bytes
+     * * `mime_type` - MIME type of the media (e.g. `"image/jpeg"`)
+     * * `filename` - Original filename (used as AAD in the encryption)
+     * * `options` - Custom processing options
+     */
+    @Throws(MdkUniffiException::class)override fun `encryptMediaForUploadWithOptions`(`mlsGroupId`: kotlin.String, `data`: kotlin.ByteArray, `mimeType`: kotlin.String, `filename`: kotlin.String, `options`: MediaProcessingOptionsInput): EncryptedMediaUploadResult {
+            return FfiConverterTypeEncryptedMediaUploadResult.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_encrypt_media_for_upload_with_options(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterByteArray.lower(`data`),FfiConverterString.lower(`mimeType`),FfiConverterString.lower(`filename`),FfiConverterTypeMediaProcessingOptionsInput.lower(`options`),_status)
+}
+    }
+    )
+    }
     
 
     
@@ -2214,6 +2457,36 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
+     * Parse an IMETA tag into a `MediaReferenceRecord` for decryption
+     *
+     * Validates and decodes the IMETA tag fields according to the MIP-04
+     * specification. The returned record can be passed directly to
+     * `decrypt_media_from_download`.
+     *
+     * The tag must be provided as a single-element `Vec<Vec<String>>` — the
+     * same format returned by `create_media_imeta_tag` and the standard UniFFI
+     * tag wire format.
+     *
+     * # Arguments
+     *
+     * * `mls_group_id` - Hex-encoded MLS group ID
+     * * `imeta_tag` - IMETA tag as `Vec<Vec<String>>`
+     */
+    @Throws(MdkUniffiException::class)override fun `parseMediaImetaTag`(`mlsGroupId`: kotlin.String, `imetaTag`: List<List<kotlin.String>>): MediaReferenceRecord {
+            return FfiConverterTypeMediaReferenceRecord.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_parse_media_imeta_tag(
+        it,
+        FfiConverterString.lower(`mlsGroupId`),FfiConverterSequenceSequenceString.lower(`imetaTag`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Process an incoming MLS message
      */
     @Throws(MdkUniffiException::class)override fun `processMessage`(`eventJson`: kotlin.String): ProcessMessageResult {
@@ -2395,6 +2668,120 @@ public object FfiConverterTypeCreateGroupResult: FfiConverterRustBuffer<CreateGr
     override fun write(value: CreateGroupResult, buf: ByteBuffer) {
             FfiConverterTypeGroup.write(value.`group`, buf)
             FfiConverterSequenceString.write(value.`welcomeRumorsJson`, buf)
+    }
+}
+
+
+
+/**
+ * Result of encrypting media for upload
+ *
+ * Contains the encrypted bytes ready for upload to a Blossom server, along
+ * with the metadata required to build the IMETA tag and later decrypt the file.
+ */
+data class EncryptedMediaUploadResult (
+    /**
+     * Encrypted media bytes — upload these to your Blossom server
+     */
+    var `encryptedData`: kotlin.ByteArray
+    , 
+    /**
+     * SHA-256 hash of the original (pre-encryption, post-sanitization) data
+     */
+    var `originalHash`: kotlin.ByteArray
+    , 
+    /**
+     * SHA-256 hash of the encrypted data — verify against the Blossom server response
+     */
+    var `encryptedHash`: kotlin.ByteArray
+    , 
+    /**
+     * Canonical MIME type of the original media (e.g. `"image/webp"`)
+     */
+    var `mimeType`: kotlin.String
+    , 
+    /**
+     * Original filename
+     */
+    var `filename`: kotlin.String
+    , 
+    /**
+     * Size of the original data in bytes
+     */
+    var `originalSize`: kotlin.ULong
+    , 
+    /**
+     * Size of the encrypted data in bytes
+     */
+    var `encryptedSize`: kotlin.ULong
+    , 
+    /**
+     * Image dimensions `[width, height]` if the media is an image, otherwise `None`
+     */
+    var `dimensions`: List<kotlin.UInt>?
+    , 
+    /**
+     * Blurhash preview string if generated, otherwise `None`
+     */
+    var `blurhash`: kotlin.String?
+    , 
+    /**
+     * 12-byte ChaCha20-Poly1305 nonce used for encryption
+     */
+    var `nonce`: kotlin.ByteArray
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeEncryptedMediaUploadResult: FfiConverterRustBuffer<EncryptedMediaUploadResult> {
+    override fun read(buf: ByteBuffer): EncryptedMediaUploadResult {
+        return EncryptedMediaUploadResult(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalSequenceUInt.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: EncryptedMediaUploadResult) = (
+            FfiConverterByteArray.allocationSize(value.`encryptedData`) +
+            FfiConverterByteArray.allocationSize(value.`originalHash`) +
+            FfiConverterByteArray.allocationSize(value.`encryptedHash`) +
+            FfiConverterString.allocationSize(value.`mimeType`) +
+            FfiConverterString.allocationSize(value.`filename`) +
+            FfiConverterULong.allocationSize(value.`originalSize`) +
+            FfiConverterULong.allocationSize(value.`encryptedSize`) +
+            FfiConverterOptionalSequenceUInt.allocationSize(value.`dimensions`) +
+            FfiConverterOptionalString.allocationSize(value.`blurhash`) +
+            FfiConverterByteArray.allocationSize(value.`nonce`)
+    )
+
+    override fun write(value: EncryptedMediaUploadResult, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`encryptedData`, buf)
+            FfiConverterByteArray.write(value.`originalHash`, buf)
+            FfiConverterByteArray.write(value.`encryptedHash`, buf)
+            FfiConverterString.write(value.`mimeType`, buf)
+            FfiConverterString.write(value.`filename`, buf)
+            FfiConverterULong.write(value.`originalSize`, buf)
+            FfiConverterULong.write(value.`encryptedSize`, buf)
+            FfiConverterOptionalSequenceUInt.write(value.`dimensions`, buf)
+            FfiConverterOptionalString.write(value.`blurhash`, buf)
+            FfiConverterByteArray.write(value.`nonce`, buf)
     }
 }
 
@@ -2946,6 +3333,174 @@ public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
             FfiConverterOptionalUInt.write(value.`maxPastEpochs`, buf)
             FfiConverterOptionalUInt.write(value.`epochSnapshotRetention`, buf)
             FfiConverterOptionalULong.write(value.`snapshotTtlSeconds`, buf)
+    }
+}
+
+
+
+/**
+ * Options for controlling media processing during encryption
+ *
+ * `max_dimension`, `max_file_size`, and `max_filename_length` are optional and
+ * fall back to sensible, privacy-first defaults when `None`.
+ * `sanitize_exif` and `generate_blurhash` are explicit toggles; pass `None` to
+ * accept the privacy-first defaults (`true` for both).
+ * To use all defaults without constructing this struct, call
+ * `encrypt_media_for_upload`.
+ */
+data class MediaProcessingOptionsInput (
+    /**
+     * Strip EXIF and other metadata from images for privacy (default: `true`)
+     */
+    var `sanitizeExif`: kotlin.Boolean?
+    , 
+    /**
+     * Generate a blurhash preview string for images (default: `true`)
+     */
+    var `generateBlurhash`: kotlin.Boolean?
+    , 
+    /**
+     * Maximum allowed image dimension in pixels (default: 16384)
+     */
+    var `maxDimension`: kotlin.UInt?
+    , 
+    /**
+     * Maximum allowed file size in bytes (default: 100 MiB)
+     */
+    var `maxFileSize`: kotlin.ULong?
+    , 
+    /**
+     * Maximum allowed filename length in characters (default: 210)
+     */
+    var `maxFilenameLength`: kotlin.ULong?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMediaProcessingOptionsInput: FfiConverterRustBuffer<MediaProcessingOptionsInput> {
+    override fun read(buf: ByteBuffer): MediaProcessingOptionsInput {
+        return MediaProcessingOptionsInput(
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MediaProcessingOptionsInput) = (
+            FfiConverterOptionalBoolean.allocationSize(value.`sanitizeExif`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`generateBlurhash`) +
+            FfiConverterOptionalUInt.allocationSize(value.`maxDimension`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxFileSize`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxFilenameLength`)
+    )
+
+    override fun write(value: MediaProcessingOptionsInput, buf: ByteBuffer) {
+            FfiConverterOptionalBoolean.write(value.`sanitizeExif`, buf)
+            FfiConverterOptionalBoolean.write(value.`generateBlurhash`, buf)
+            FfiConverterOptionalUInt.write(value.`maxDimension`, buf)
+            FfiConverterOptionalULong.write(value.`maxFileSize`, buf)
+            FfiConverterOptionalULong.write(value.`maxFilenameLength`, buf)
+    }
+}
+
+
+
+/**
+ * A reference to an encrypted media file stored on a Blossom server
+ *
+ * This is parsed from an IMETA tag (via `parse_media_imeta_tag`) and passed
+ * to `decrypt_media_from_download` to retrieve the original file.
+ */
+data class MediaReferenceRecord (
+    /**
+     * URL where the encrypted file is stored
+     */
+    var `url`: kotlin.String
+    , 
+    /**
+     * SHA-256 hash of the original (pre-encryption) data — 32 bytes
+     */
+    var `originalHash`: kotlin.ByteArray
+    , 
+    /**
+     * MIME type of the original media
+     */
+    var `mimeType`: kotlin.String
+    , 
+    /**
+     * Original filename
+     */
+    var `filename`: kotlin.String
+    , 
+    /**
+     * Image dimensions `[width, height]` if the media is an image, otherwise `None`
+     */
+    var `dimensions`: List<kotlin.UInt>?
+    , 
+    /**
+     * Encryption scheme version (e.g. `"mip04-v2"`)
+     */
+    var `schemeVersion`: kotlin.String
+    , 
+    /**
+     * 12-byte ChaCha20-Poly1305 nonce — 12 bytes
+     */
+    var `nonce`: kotlin.ByteArray
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMediaReferenceRecord: FfiConverterRustBuffer<MediaReferenceRecord> {
+    override fun read(buf: ByteBuffer): MediaReferenceRecord {
+        return MediaReferenceRecord(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalSequenceUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MediaReferenceRecord) = (
+            FfiConverterString.allocationSize(value.`url`) +
+            FfiConverterByteArray.allocationSize(value.`originalHash`) +
+            FfiConverterString.allocationSize(value.`mimeType`) +
+            FfiConverterString.allocationSize(value.`filename`) +
+            FfiConverterOptionalSequenceUInt.allocationSize(value.`dimensions`) +
+            FfiConverterString.allocationSize(value.`schemeVersion`) +
+            FfiConverterByteArray.allocationSize(value.`nonce`)
+    )
+
+    override fun write(value: MediaReferenceRecord, buf: ByteBuffer) {
+            FfiConverterString.write(value.`url`, buf)
+            FfiConverterByteArray.write(value.`originalHash`, buf)
+            FfiConverterString.write(value.`mimeType`, buf)
+            FfiConverterString.write(value.`filename`, buf)
+            FfiConverterOptionalSequenceUInt.write(value.`dimensions`, buf)
+            FfiConverterString.write(value.`schemeVersion`, buf)
+            FfiConverterByteArray.write(value.`nonce`, buf)
     }
 }
 
@@ -3732,6 +4287,38 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalBoolean: FfiConverterRustBuffer<kotlin.Boolean?> {
+    override fun read(buf: ByteBuffer): kotlin.Boolean? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterBoolean.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.Boolean?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterBoolean.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.Boolean?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterBoolean.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?> {
     override fun read(buf: ByteBuffer): kotlin.String? {
         if (buf.get().toInt() == 0) {
@@ -3988,6 +4575,38 @@ public object FfiConverterOptionalOptionalByteArray: FfiConverterRustBuffer<kotl
 /**
  * @suppress
  */
+public object FfiConverterOptionalSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>?> {
+    override fun read(buf: ByteBuffer): List<kotlin.UInt>? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterSequenceUInt.read(buf)
+    }
+
+    override fun allocationSize(value: List<kotlin.UInt>?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterSequenceUInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: List<kotlin.UInt>?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterSequenceUInt.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalSequenceString: FfiConverterRustBuffer<List<kotlin.String>?> {
     override fun read(buf: ByteBuffer): List<kotlin.String>? {
         if (buf.get().toInt() == 0) {
@@ -4042,6 +4661,34 @@ public object FfiConverterOptionalSequenceSequenceString: FfiConverterRustBuffer
         } else {
             buf.put(1)
             FfiConverterSequenceSequenceString.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
+    override fun read(buf: ByteBuffer): List<kotlin.UInt> {
+        val len = buf.getInt()
+        return List<kotlin.UInt>(len) {
+            FfiConverterUInt.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.UInt>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterUInt.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.UInt>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterUInt.write(it, buf)
         }
     }
 }
