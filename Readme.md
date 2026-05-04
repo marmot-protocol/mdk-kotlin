@@ -15,7 +15,7 @@ Add the following dependencies (always add them as aar! it will not work otherwi
 ```kotlin
 dependencies {
     implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("com.github.marmot-protocol:mdk-kotlin:0.7.1@aar") 
+    implementation("com.github.marmot-protocol:mdk-kotlin:0.8.0@aar") 
 }
 ```
 
