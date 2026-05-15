@@ -708,7 +708,11 @@ internal object IntegrityCheckingUniffiLib {
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_get_welcome(
     ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_group_capability_upgrade_status(
+    ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_group_leaf_map(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_group_member_capabilities(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_group_required_proposals(
     ): Short
@@ -745,6 +749,8 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_mdk_uniffi_checksum_method_mdk_sync_group_metadata_from_mls(
     ): Short
     external fun uniffi_mdk_uniffi_checksum_method_mdk_update_group_data(
+    ): Short
+    external fun uniffi_mdk_uniffi_checksum_method_mdk_upgrade_group_capabilities(
     ): Short
     external fun ffi_mdk_uniffi_uniffi_contract_version(
     ): Int
@@ -824,7 +830,11 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_get_relays(`ptr`: Long,`mlsGroupId`
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_get_welcome(`ptr`: Long,`eventId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_group_capability_upgrade_status(`ptr`: Long,`groupIdHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_group_leaf_map(`ptr`: Long,`groupIdHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_group_member_capabilities(`ptr`: Long,`groupIdHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_group_required_proposals(`ptr`: Long,`groupIdHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -861,6 +871,8 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_self_update(`ptr`: Long,`mlsGroupId
 external fun uniffi_mdk_uniffi_fn_method_mdk_sync_group_metadata_from_mls(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 external fun uniffi_mdk_uniffi_fn_method_mdk_update_group_data(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`update`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+external fun uniffi_mdk_uniffi_fn_method_mdk_upgrade_group_capabilities(`ptr`: Long,`groupIdHex`: RustBuffer.ByValue,`proposalsToAdd`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_func_decrypt_group_image(`encryptedData`: RustBuffer.ByValue,`expectedHash`: RustBuffer.ByValue,`imageKey`: RustBuffer.ByValue,`imageNonce`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -1100,7 +1112,13 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_get_welcome() != 25012.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_group_capability_upgrade_status() != 56220.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_group_leaf_map() != 58304.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_group_member_capabilities() != 43344.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_group_required_proposals() != 24118.toShort()) {
@@ -1155,6 +1173,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_update_group_data() != 32068.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_upgrade_group_capabilities() != 21210.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1868,6 +1889,18 @@ public interface MdkInterface {
     fun `getWelcome`(`eventId`: kotlin.String): Welcome?
     
     /**
+     * Returns per-proposal capability upgrade readiness for a group.
+     *
+     * Any member may call this. Each entry reports whether the mirrored proposal type is already
+     * required, currently available for upgrade, or blocked by one or more members.
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     */
+    fun `groupCapabilityUpgradeStatus`(`groupIdHex`: kotlin.String): MdkCapabilityUpgradeStatus
+    
+    /**
      * Returns the current active MLS leaf positions and their bound Nostr public keys
      *
      * Returns a list of (leaf_index, public_key_hex) pairs. Removed-member tree
@@ -1878,6 +1911,17 @@ public interface MdkInterface {
      * * `group_id_hex` - Hex-encoded MLS group ID
      */
     fun `groupLeafMap`(`groupIdHex`: kotlin.String): List<LeafMapEntry>
+    
+    /**
+     * Returns per-member advertised MLS capabilities for every active group leaf.
+     *
+     * Any member may call this. The returned vector is ordered by MLS leaf index.
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     */
+    fun `groupMemberCapabilities`(`groupIdHex`: kotlin.String): List<MdkMemberCapabilities>
     
     /**
      * Returns the proposal types required of every member of this group.
@@ -2027,6 +2071,19 @@ public interface MdkInterface {
      * Update group data (name, description, image, relays, admins)
      */
     fun `updateGroupData`(`mlsGroupId`: kotlin.String, `update`: GroupDataUpdate): UpdateGroupResult
+    
+    /**
+     * Proposes a group capability upgrade by adding proposal types to `RequiredCapabilities`.
+     *
+     * Admin-only. Pass the proposal types reported as `Available` by
+     * [`Mdk::group_capability_upgrade_status`].
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     * * `proposals_to_add` - Proposal types to add to the group's required capabilities
+     */
+    fun `upgradeGroupCapabilities`(`groupIdHex`: kotlin.String, `proposalsToAdd`: List<MdkProposalType>): UpdateGroupResult
     
     companion object
 }
@@ -2744,6 +2801,30 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
 
     
     /**
+     * Returns per-proposal capability upgrade readiness for a group.
+     *
+     * Any member may call this. Each entry reports whether the mirrored proposal type is already
+     * required, currently available for upgrade, or blocked by one or more members.
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     */
+    @Throws(MdkUniffiException::class)override fun `groupCapabilityUpgradeStatus`(`groupIdHex`: kotlin.String): MdkCapabilityUpgradeStatus {
+            return FfiConverterTypeMdkCapabilityUpgradeStatus.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_group_capability_upgrade_status(
+        it,
+        FfiConverterString.lower(`groupIdHex`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Returns the current active MLS leaf positions and their bound Nostr public keys
      *
      * Returns a list of (leaf_index, public_key_hex) pairs. Removed-member tree
@@ -2758,6 +2839,29 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_group_leaf_map(
+        it,
+        FfiConverterString.lower(`groupIdHex`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Returns per-member advertised MLS capabilities for every active group leaf.
+     *
+     * Any member may call this. The returned vector is ordered by MLS leaf index.
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     */
+    @Throws(MdkUniffiException::class)override fun `groupMemberCapabilities`(`groupIdHex`: kotlin.String): List<MdkMemberCapabilities> {
+            return FfiConverterSequenceTypeMdkMemberCapabilities.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_group_member_capabilities(
         it,
         FfiConverterString.lower(`groupIdHex`),_status)
 }
@@ -3123,6 +3227,31 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_update_group_data(
         it,
         FfiConverterString.lower(`mlsGroupId`),FfiConverterTypeGroupDataUpdate.lower(`update`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Proposes a group capability upgrade by adding proposal types to `RequiredCapabilities`.
+     *
+     * Admin-only. Pass the proposal types reported as `Available` by
+     * [`Mdk::group_capability_upgrade_status`].
+     *
+     * # Arguments
+     *
+     * * `group_id_hex` - Hex-encoded MLS group ID
+     * * `proposals_to_add` - Proposal types to add to the group's required capabilities
+     */
+    @Throws(MdkUniffiException::class)override fun `upgradeGroupCapabilities`(`groupIdHex`: kotlin.String, `proposalsToAdd`: List<MdkProposalType>): UpdateGroupResult {
+            return FfiConverterTypeUpdateGroupResult.lift(
+    callWithHandle {
+    uniffiRustCallWithError(MdkUniffiException) { _status ->
+    UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_upgrade_group_capabilities(
+        it,
+        FfiConverterString.lower(`groupIdHex`),FfiConverterSequenceTypeMdkProposalType.lower(`proposalsToAdd`),_status)
 }
     }
     )
@@ -3862,6 +3991,45 @@ public object FfiConverterTypeLeafMapEntry: FfiConverterRustBuffer<LeafMapEntry>
 
 
 /**
+ * Per-proposal capability upgrade readiness for a group.
+ */
+data class MdkCapabilityUpgradeStatus (
+    /**
+     * One entry per proposal type MDK reports through the UniFFI API.
+     */
+    var `perProposal`: List<MdkProposalUpgradeStatus>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMdkCapabilityUpgradeStatus: FfiConverterRustBuffer<MdkCapabilityUpgradeStatus> {
+    override fun read(buf: ByteBuffer): MdkCapabilityUpgradeStatus {
+        return MdkCapabilityUpgradeStatus(
+            FfiConverterSequenceTypeMdkProposalUpgradeStatus.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MdkCapabilityUpgradeStatus) = (
+            FfiConverterSequenceTypeMdkProposalUpgradeStatus.allocationSize(value.`perProposal`)
+    )
+
+    override fun write(value: MdkCapabilityUpgradeStatus, buf: ByteBuffer) {
+            FfiConverterSequenceTypeMdkProposalUpgradeStatus.write(value.`perProposal`, buf)
+    }
+}
+
+
+
+/**
  * Configuration for MDK behavior
  *
  * This struct allows customization of various MDK parameters including
@@ -3958,6 +4126,124 @@ public object FfiConverterTypeMdkConfig: FfiConverterRustBuffer<MdkConfig> {
             FfiConverterOptionalUInt.write(value.`maxPastEpochs`, buf)
             FfiConverterOptionalUInt.write(value.`epochSnapshotRetention`, buf)
             FfiConverterOptionalULong.write(value.`snapshotTtlSeconds`, buf)
+    }
+}
+
+
+
+/**
+ * Public MLS capabilities advertised by one group member's current leaf.
+ */
+data class MdkMemberCapabilities (
+    /**
+     * Hex-encoded public key for this member.
+     */
+    var `member`: kotlin.String
+    , 
+    /**
+     * Whether this member is currently a group admin.
+     */
+    var `isAdmin`: kotlin.Boolean
+    , 
+    /**
+     * Proposal types advertised by this member, deduplicated after UniFFI mirroring.
+     */
+    var `proposals`: List<MdkProposalType>
+    , 
+    /**
+     * Raw MLS extension type registry values advertised by this member.
+     */
+    var `extensions`: List<kotlin.UShort>
+    , 
+    /**
+     * Raw MLS ciphersuite registry values advertised by this member.
+     */
+    var `ciphersuites`: List<kotlin.UShort>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMdkMemberCapabilities: FfiConverterRustBuffer<MdkMemberCapabilities> {
+    override fun read(buf: ByteBuffer): MdkMemberCapabilities {
+        return MdkMemberCapabilities(
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterSequenceTypeMdkProposalType.read(buf),
+            FfiConverterSequenceUShort.read(buf),
+            FfiConverterSequenceUShort.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MdkMemberCapabilities) = (
+            FfiConverterString.allocationSize(value.`member`) +
+            FfiConverterBoolean.allocationSize(value.`isAdmin`) +
+            FfiConverterSequenceTypeMdkProposalType.allocationSize(value.`proposals`) +
+            FfiConverterSequenceUShort.allocationSize(value.`extensions`) +
+            FfiConverterSequenceUShort.allocationSize(value.`ciphersuites`)
+    )
+
+    override fun write(value: MdkMemberCapabilities, buf: ByteBuffer) {
+            FfiConverterString.write(value.`member`, buf)
+            FfiConverterBoolean.write(value.`isAdmin`, buf)
+            FfiConverterSequenceTypeMdkProposalType.write(value.`proposals`, buf)
+            FfiConverterSequenceUShort.write(value.`extensions`, buf)
+            FfiConverterSequenceUShort.write(value.`ciphersuites`, buf)
+    }
+}
+
+
+
+/**
+ * Upgrade readiness for one proposal type.
+ */
+data class MdkProposalUpgradeStatus (
+    /**
+     * The proposal type being reported.
+     */
+    var `proposal`: MdkProposalType
+    , 
+    /**
+     * Whether this proposal can be added to required capabilities.
+     */
+    var `upgradability`: MdkProposalUpgradability
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMdkProposalUpgradeStatus: FfiConverterRustBuffer<MdkProposalUpgradeStatus> {
+    override fun read(buf: ByteBuffer): MdkProposalUpgradeStatus {
+        return MdkProposalUpgradeStatus(
+            FfiConverterTypeMdkProposalType.read(buf),
+            FfiConverterTypeMdkProposalUpgradability.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: MdkProposalUpgradeStatus) = (
+            FfiConverterTypeMdkProposalType.allocationSize(value.`proposal`) +
+            FfiConverterTypeMdkProposalUpgradability.allocationSize(value.`upgradability`)
+    )
+
+    override fun write(value: MdkProposalUpgradeStatus, buf: ByteBuffer) {
+            FfiConverterTypeMdkProposalType.write(value.`proposal`, buf)
+            FfiConverterTypeMdkProposalUpgradability.write(value.`upgradability`, buf)
     }
 }
 
@@ -4718,6 +5004,108 @@ public object FfiConverterTypeMdkProposalType: FfiConverterRustBuffer<MdkProposa
 
     override fun write(value: MdkProposalType, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * UniFFI-friendly upgrade readiness for a proposal type.
+ */
+sealed class MdkProposalUpgradability {
+    
+    /**
+     * The proposal type is already required by the group.
+     */
+    object AlreadyRequired : MdkProposalUpgradability()
+    
+    
+    /**
+     * Every current member advertises this proposal type, so an admin may upgrade it.
+     */
+    object Available : MdkProposalUpgradability()
+    
+    
+    /**
+     * One or more members do not advertise this proposal type.
+     */
+    data class Blocked(
+        /**
+         * Hex-encoded public keys of members blocking this upgrade.
+         */
+        val `blockers`: List<kotlin.String>) : MdkProposalUpgradability()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMdkProposalUpgradability : FfiConverterRustBuffer<MdkProposalUpgradability>{
+    override fun read(buf: ByteBuffer): MdkProposalUpgradability {
+        return when(buf.getInt()) {
+            1 -> MdkProposalUpgradability.AlreadyRequired
+            2 -> MdkProposalUpgradability.Available
+            3 -> MdkProposalUpgradability.Blocked(
+                FfiConverterSequenceString.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: MdkProposalUpgradability) = when(value) {
+        is MdkProposalUpgradability.AlreadyRequired -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is MdkProposalUpgradability.Available -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is MdkProposalUpgradability.Blocked -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterSequenceString.allocationSize(value.`blockers`)
+            )
+        }
+    }
+
+    override fun write(value: MdkProposalUpgradability, buf: ByteBuffer) {
+        when(value) {
+            is MdkProposalUpgradability.AlreadyRequired -> {
+                buf.putInt(1)
+                Unit
+            }
+            is MdkProposalUpgradability.Available -> {
+                buf.putInt(2)
+                Unit
+            }
+            is MdkProposalUpgradability.Blocked -> {
+                buf.putInt(3)
+                FfiConverterSequenceString.write(value.`blockers`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
     }
 }
 
@@ -5569,6 +5957,34 @@ public object FfiConverterOptionalSequenceSequenceString: FfiConverterRustBuffer
 /**
  * @suppress
  */
+public object FfiConverterSequenceUShort: FfiConverterRustBuffer<List<kotlin.UShort>> {
+    override fun read(buf: ByteBuffer): List<kotlin.UShort> {
+        val len = buf.getInt()
+        return List<kotlin.UShort>(len) {
+            FfiConverterUShort.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.UShort>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterUShort.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.UShort>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterUShort.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
     override fun read(buf: ByteBuffer): List<kotlin.UInt> {
         val len = buf.getInt()
@@ -5671,6 +6087,62 @@ public object FfiConverterSequenceTypeLeafMapEntry: FfiConverterRustBuffer<List<
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeLeafMapEntry.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeMdkMemberCapabilities: FfiConverterRustBuffer<List<MdkMemberCapabilities>> {
+    override fun read(buf: ByteBuffer): List<MdkMemberCapabilities> {
+        val len = buf.getInt()
+        return List<MdkMemberCapabilities>(len) {
+            FfiConverterTypeMdkMemberCapabilities.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<MdkMemberCapabilities>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeMdkMemberCapabilities.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<MdkMemberCapabilities>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeMdkMemberCapabilities.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeMdkProposalUpgradeStatus: FfiConverterRustBuffer<List<MdkProposalUpgradeStatus>> {
+    override fun read(buf: ByteBuffer): List<MdkProposalUpgradeStatus> {
+        val len = buf.getInt()
+        return List<MdkProposalUpgradeStatus>(len) {
+            FfiConverterTypeMdkProposalUpgradeStatus.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<MdkProposalUpgradeStatus>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeMdkProposalUpgradeStatus.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<MdkProposalUpgradeStatus>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeMdkProposalUpgradeStatus.write(it, buf)
         }
     }
 }
