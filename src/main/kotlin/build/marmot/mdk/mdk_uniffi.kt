@@ -3399,6 +3399,16 @@ data class EncryptedMediaUploadResult (
     var `thumbhash`: kotlin.String?
     , 
     /**
+     * Optional audio duration in milliseconds for display purposes
+     */
+    var `durationMs`: kotlin.ULong?
+    , 
+    /**
+     * Optional audio waveform samples in the inclusive range 0..=100
+     */
+    var `waveform`: kotlin.ByteArray?
+    , 
+    /**
      * 12-byte ChaCha20-Poly1305 nonce used for encryption
      */
     var `nonce`: kotlin.ByteArray
@@ -3428,6 +3438,8 @@ public object FfiConverterTypeEncryptedMediaUploadResult: FfiConverterRustBuffer
             FfiConverterOptionalSequenceUInt.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterByteArray.read(buf),
         )
     }
@@ -3443,6 +3455,8 @@ public object FfiConverterTypeEncryptedMediaUploadResult: FfiConverterRustBuffer
             FfiConverterOptionalSequenceUInt.allocationSize(value.`dimensions`) +
             FfiConverterOptionalString.allocationSize(value.`blurhash`) +
             FfiConverterOptionalString.allocationSize(value.`thumbhash`) +
+            FfiConverterOptionalULong.allocationSize(value.`durationMs`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`waveform`) +
             FfiConverterByteArray.allocationSize(value.`nonce`)
     )
 
@@ -3457,6 +3471,8 @@ public object FfiConverterTypeEncryptedMediaUploadResult: FfiConverterRustBuffer
             FfiConverterOptionalSequenceUInt.write(value.`dimensions`, buf)
             FfiConverterOptionalString.write(value.`blurhash`, buf)
             FfiConverterOptionalString.write(value.`thumbhash`, buf)
+            FfiConverterOptionalULong.write(value.`durationMs`, buf)
+            FfiConverterOptionalByteArray.write(value.`waveform`, buf)
             FfiConverterByteArray.write(value.`nonce`, buf)
     }
 }
@@ -4436,6 +4452,16 @@ data class MediaReferenceRecord (
     var `dimensions`: List<kotlin.UInt>?
     , 
     /**
+     * Optional audio duration in milliseconds for display purposes
+     */
+    var `durationMs`: kotlin.ULong?
+    , 
+    /**
+     * Optional audio waveform samples in the inclusive range 0..=100
+     */
+    var `waveform`: kotlin.ByteArray?
+    , 
+    /**
      * Encryption scheme version (e.g. `"mip04-v2"`)
      */
     var `schemeVersion`: kotlin.String
@@ -4465,6 +4491,8 @@ public object FfiConverterTypeMediaReferenceRecord: FfiConverterRustBuffer<Media
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterOptionalSequenceUInt.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterString.read(buf),
             FfiConverterByteArray.read(buf),
         )
@@ -4476,6 +4504,8 @@ public object FfiConverterTypeMediaReferenceRecord: FfiConverterRustBuffer<Media
             FfiConverterString.allocationSize(value.`mimeType`) +
             FfiConverterString.allocationSize(value.`filename`) +
             FfiConverterOptionalSequenceUInt.allocationSize(value.`dimensions`) +
+            FfiConverterOptionalULong.allocationSize(value.`durationMs`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`waveform`) +
             FfiConverterString.allocationSize(value.`schemeVersion`) +
             FfiConverterByteArray.allocationSize(value.`nonce`)
     )
@@ -4486,6 +4516,8 @@ public object FfiConverterTypeMediaReferenceRecord: FfiConverterRustBuffer<Media
             FfiConverterString.write(value.`mimeType`, buf)
             FfiConverterString.write(value.`filename`, buf)
             FfiConverterOptionalSequenceUInt.write(value.`dimensions`, buf)
+            FfiConverterOptionalULong.write(value.`durationMs`, buf)
+            FfiConverterOptionalByteArray.write(value.`waveform`, buf)
             FfiConverterString.write(value.`schemeVersion`, buf)
             FfiConverterByteArray.write(value.`nonce`, buf)
     }
