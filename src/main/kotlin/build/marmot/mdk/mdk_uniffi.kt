@@ -786,7 +786,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPu
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`protected`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`options`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_media_imeta_tag(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,`upload`: RustBuffer.ByValue,`uploadedUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -1046,7 +1046,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event() != 46847.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options() != 59356.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event_with_options() != 22774.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_media_imeta_tag() != 4917.toShort()) {
@@ -1655,12 +1655,10 @@ public interface MdkInterface {
      *
      * * `public_key` - The Nostr public key (hex) for the credential
      * * `relays` - Relay URLs where the key package will be published
-     * * `protected` - Whether to add the NIP-70 protected tag. When `true`, relays that
-     * implement NIP-70 will reject republishing by third parties. However, many popular
-     * relays reject protected events entirely. Set to `false` for maximum relay
-     * compatibility.
+     * * `options` - Event-construction options ([`KeyPackageOptions`]). Use the default
+     * value for "no protected tag, freshly generated `d` tag" behavior.
      */
-    fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `protected`: kotlin.Boolean): KeyPackageResult
+    fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `options`: KeyPackageOptions): KeyPackageResult
     
     /**
      * Build an IMETA tag for an encrypted media upload
@@ -2308,18 +2306,16 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
      *
      * * `public_key` - The Nostr public key (hex) for the credential
      * * `relays` - Relay URLs where the key package will be published
-     * * `protected` - Whether to add the NIP-70 protected tag. When `true`, relays that
-     * implement NIP-70 will reject republishing by third parties. However, many popular
-     * relays reject protected events entirely. Set to `false` for maximum relay
-     * compatibility.
+     * * `options` - Event-construction options ([`KeyPackageOptions`]). Use the default
+     * value for "no protected tag, freshly generated `d` tag" behavior.
      */
-    @Throws(MdkUniffiException::class)override fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `protected`: kotlin.Boolean): KeyPackageResult {
+    @Throws(MdkUniffiException::class)override fun `createKeyPackageForEventWithOptions`(`publicKey`: kotlin.String, `relays`: List<kotlin.String>, `options`: KeyPackageOptions): KeyPackageResult {
             return FfiConverterTypeKeyPackageResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event_with_options(
         it,
-        FfiConverterString.lower(`publicKey`),FfiConverterSequenceString.lower(`relays`),FfiConverterBoolean.lower(`protected`),_status)
+        FfiConverterString.lower(`publicKey`),FfiConverterSequenceString.lower(`relays`),FfiConverterTypeKeyPackageOptions.lower(`options`),_status)
 }
     }
     )
@@ -3870,6 +3866,75 @@ public object FfiConverterTypeImageDimensions: FfiConverterRustBuffer<ImageDimen
 
 
 /**
+ * Options for creating a key package event.
+ *
+ * Mirrors `mdk_core::key_packages::KeyPackageOptions`. Both fields carry FFI-level
+ * defaults via `#[uniffi(default = ...)]`, so foreign callers (Kotlin / Swift /
+ * Python) can omit either or both for the standard behavior — e.g. in Kotlin,
+ * `KeyPackageOptions()` is equivalent to
+ * `KeyPackageOptions(protected = false, existingDTag = null)`. Or skip options
+ * entirely by calling `create_key_package_for_event` instead.
+ */
+data class KeyPackageOptions (
+    /**
+     * Add the NIP-70 protected tag (`["-"]`).
+     *
+     * When `true`, relays that implement NIP-70 will reject republishing of this
+     * event by third parties. Many popular relays (Damus, Primal, nos.lol) reject
+     * protected events entirely — only enable when publishing to relays known to
+     * accept NIP-70 protected events. Defaults to `false` for max relay compat.
+     */
+    var `protected`: kotlin.Boolean = false 
+    , 
+    /**
+     * Reuse an existing `d` tag value instead of generating a new one.
+     *
+     * Pass a previously stored `d_tag` here to rotate a KeyPackage while keeping
+     * the NIP-33 addressable slot stable — relays replace the previous event under
+     * the same `(kind, pubkey, d)` coordinate.
+     *
+     * Must be exactly 64 ASCII hex digits (per MIP-00). Validation runs at the FFI
+     * boundary; malformed input surfaces as `MdkUniffiError::InvalidInput` before
+     * crossing into `mdk_core`, matching how `parse_public_key` / `parse_relay_urls`
+     * report parameter errors. When `None` (the default), a fresh random 32-byte
+     * hex value is generated.
+     */
+    var `existingDTag`: kotlin.String? = null 
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeKeyPackageOptions: FfiConverterRustBuffer<KeyPackageOptions> {
+    override fun read(buf: ByteBuffer): KeyPackageOptions {
+        return KeyPackageOptions(
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: KeyPackageOptions) = (
+            FfiConverterBoolean.allocationSize(value.`protected`) +
+            FfiConverterOptionalString.allocationSize(value.`existingDTag`)
+    )
+
+    override fun write(value: KeyPackageOptions, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`protected`, buf)
+            FfiConverterOptionalString.write(value.`existingDTag`, buf)
+    }
+}
+
+
+
+/**
  * Result of creating a key package
  */
 data class KeyPackageResult (
@@ -3894,10 +3959,12 @@ data class KeyPackageResult (
     var `hashRef`: kotlin.ByteArray
     , 
     /**
-     * The `d` tag value (32-byte hex string) for this KeyPackage slot.
-     * Callers SHOULD store this and, when rotating, replace the generated
-     * `["d", ...]` entry in `tags` with the stored value before signing.
-     * Reusing the same `(kind, pubkey, d)` tuple lets relays replace the old event.
+     * The `d` tag value (hex string) for this KeyPackage slot.
+     *
+     * Callers SHOULD store this and, when rotating, pass it back via
+     * [`KeyPackageOptions::existing_d_tag`] so MDK emits the same `d` value
+     * directly — no need to post-edit the tag list. Reusing the same
+     * `(kind, pubkey, d)` tuple lets relays replace the old event.
      */
     var `dTag`: kotlin.String
     
