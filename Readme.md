@@ -10,41 +10,28 @@ repositories {
 }
 ```
 
-Add the following dependencies to your `build.gradle.kts` (always add them as `aar`, otherwise the library will not work):
+Add the following dependencies (always add them as aar! it will not work otherwise): 
 
 ```kotlin
 dependencies {
     implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("com.github.marmot-protocol:mdk-kotlin:0.8.0@aar")
+    implementation("com.github.marmot-protocol:mdk-kotlin:0.8.0@aar") 
 }
 ```
 
 **Note:** The library version is automatically synchronized with the Rust crate version from `Cargo.toml` during the build process. The version is embedded in `gradle.properties` and published to the separate `mdk-kotlin` repository. Check the repository releases or `gradle.properties` for the current version.
+
+to your build.gradle.kts
 
 ### Import and Initialize
 
 ```kotlin
 import build.marmot.mdk.*
 
-// Create an MDK instance backed by an encrypted SQLite database.
-// The encryption key is managed automatically via the platform keyring
-// (Android Keystore on Android).
+// Create an MDK instance with a SQLite database path
 val dbPath = context.filesDir.resolve("mdk.db").absolutePath
-val mdk = newMdk(
-    dbPath = dbPath,
-    serviceId = "com.example.myapp",   // stable application identifier
-    dbKeyId = "mdk.db.key.default",    // stable identifier for this DB's key
-    config = null,                      // optional MdkConfig; null uses defaults
-)
+val mdk = newMdk(dbPath)
 ```
-
-If you want to manage the encryption key yourself instead of using the
-platform keyring, use `newMdkWithKey(dbPath, encryptionKey, config)`
-(the key must be exactly 32 bytes).
-
-`newMdk` initializes the platform keyring store on first use. If you need to
-prime it ahead of time (or in tests), you can call the top-level
-`initKeyringStore()` once at startup.
 
 ### Create and Publish Key Package
 
@@ -57,26 +44,16 @@ val result = mdk.createKeyPackageForEvent(
     relays = relays
 )
 
-// result.keyPackage  — Base64-encoded key package content
-// result.tags        — tags for the kind:30443 event (includes the `d` tag)
-// result.tagsLegacy  — tags for the legacy kind:443 event (omits the `d` tag)
-// result.hashRef     — serialized hash_ref bytes (for lifecycle tracking)
-// result.dTag        — the `d` tag value; store this so you can pass it back
-//                      via KeyPackageOptions::existing_d_tag when rotating
+// result.keyPackage contains the hex-encoded key package
+// result.tags contains Nostr event tags (List<List<String>>)
+// Publish as a Nostr event (kind 443) to your relays
 ```
 
-To rotate an existing key package while keeping the same `(kind, pubkey, d)`
-address (so relays replace the previous event), use
-`createKeyPackageForEventWithOptions(publicKey, relays, options: KeyPackageOptions)`
-and set `options.existingDTag` to the `dTag` you stored from the prior call.
+#### Build and Publish a Kind 443 Event
 
-#### Build and Publish the Key Package Event
-
-`KeyPackageResult` already contains the Base64 payload (`keyPackage`) and the
-tags that need to go on the Nostr event. You only need to wrap it in your
-preferred Nostr event type, sign it, and push it to the relays you want to
-advertise on. Use `result.tags` with kind `30443` (the addressable form), or
-`result.tagsLegacy` with kind `443` (the legacy form):
+`KeyPackageResult` already contains the payload (`keyPackage`) and all tags that
+need to go on the Nostr event. You only need to wrap it in your preferred Nostr
+event type, sign it, and push it to the relays you want to advertise on:
 
 ```kotlin
 data class UnsignedEvent(
@@ -95,7 +72,7 @@ val keyPackageResult = mdk.createKeyPackageForEvent(
 val unsigned = UnsignedEvent(
     pubkey = myPublicKey,
     created_at = System.currentTimeMillis() / 1000,
-    kind = 30443,
+    kind = 443,
     tags = keyPackageResult.tags,
     content = keyPackageResult.keyPackage
 )
@@ -111,33 +88,17 @@ embed in a standard Nostr event.
 ### Parse Key Packages
 
 ```kotlin
-// When you receive a key package event from Nostr (kind 30443 or 443)
+// When you receive a key package event from Nostr
 val eventJson = """
 {
     "id": "...",
-    "kind": 30443,
-    "content": "base64_key_package...",
+    "kind": 443,
+    "content": "hex_key_package...",
     ...
 }
 """.trimIndent()
 
-// Returns a string identifying the parsed key package.
-val keyPackageId = mdk.parseKeyPackage(eventJson = eventJson)
-```
-
-### Delete Key Packages from Storage
-
-Once a KeyPackage has been consumed (e.g. used to invite you to a group) it
-should be removed from MLS storage. You can delete it either by passing the
-original Nostr event JSON or by passing the `hashRef` bytes you got back from
-`createKeyPackageForEvent`:
-
-```kotlin
-// Delete by full key package event JSON
-mdk.deleteKeyPackageFromStorage(keyPackageEventJson = eventJson)
-
-// Or delete by the hashRef returned at creation time
-mdk.deleteKeyPackageFromStorageByHashRef(hashRef = keyPackageResult.hashRef)
+mdk.parseKeyPackage(eventJson = eventJson)
 ```
 
 ### Create a Group
@@ -197,13 +158,6 @@ members.forEach { member ->
 }
 ```
 
-### Get Group Relays
-
-```kotlin
-val relays = mdk.getRelays(mlsGroupId = "hex_group_id")
-relays.forEach { println(it) }
-```
-
 ### Add Members to a Group
 
 ```kotlin
@@ -231,115 +185,34 @@ val result = mdk.removeMembers(
 )
 ```
 
-### Update Group Data
+### Update Group Metadata
 
 ```kotlin
 val mlsGroupId = "hex_group_id"
+val newName = "Updated Group Name"
+val newDescription = "New description"
+val newRelays = listOf("wss://new-relay.com")
 
-// Only set the fields you want to change; leave the others as null.
-val update = GroupDataUpdate(
-    name = "Updated Group Name",
-    description = "New description",
-    imageHash = null,
-    imageKey = null,
-    imageNonce = null,
-    relays = listOf("wss://new-relay.com"),
-    admins = null,
-)
-
-val result = mdk.updateGroupData(
+val result = mdk.updateGroupMetadata(
     mlsGroupId = mlsGroupId,
-    update = update,
+    name = newName,
+    description = newDescription,
+    relays = newRelays
 )
-// result is an UpdateGroupResult — see "Add Members to a Group" above.
-```
-
-### Leave a Group
-
-Creates a proposal that, once committed by an admin, removes you from the
-group. Non-admin members typically do this; admins should first call
-`selfDemote` (see below).
-
-```kotlin
-val result = mdk.leaveGroup(mlsGroupId = "hex_group_id")
-// result is an UpdateGroupResult — publish result.evolutionEventJson.
-```
-
-### Self-Demote (Admin)
-
-Per MIP-03, an admin must demote themselves before calling `leaveGroup`. If you
-are the last admin, designate a successor via `updateGroupData` first.
-
-```kotlin
-val result = mdk.selfDemote(mlsGroupId = "hex_group_id")
-// Publish result.evolutionEventJson.
-```
-
-### Self-Update
-
-Refresh your own MLS leaf node. Use this to rotate keys, complete a post-join
-self-update (MIP-02), or recover after a stale rotation.
-
-```kotlin
-val result = mdk.selfUpdate(mlsGroupId = "hex_group_id")
-```
-
-To find groups that currently need a self-update (post-join or older than the
-given threshold in seconds):
-
-```kotlin
-val needsUpdate = mdk.groupsNeedingSelfUpdate(thresholdSecs = 86_400u)
-needsUpdate.forEach { mdk.selfUpdate(mlsGroupId = it) }
-```
-
-### Delete a Group
-
-Removes all local state for a group. This is a local operation only; it does
-not send anything to other members.
-
-```kotlin
-mdk.deleteGroup(mlsGroupId = "hex_group_id")
-```
-
-### Sync Group Metadata from MLS
-
-Re-reads the latest committed group metadata from the underlying MLS state
-into the MDK storage layer. Use this if the cached `Group` row has drifted
-from MLS truth.
-
-```kotlin
-mdk.syncGroupMetadataFromMls(mlsGroupId = "hex_group_id")
-```
-
-### Recover From a Failed Commit
-
-When a commit you produced couldn't be published (e.g. all relays rejected
-the evolution event after retries), roll the group back to its pre-commit
-state:
-
-```kotlin
-mdk.clearPendingCommit(mlsGroupId = "hex_group_id")
-```
-
-The opposite operation, finalizing a commit that you've already published
-and confirmed, is `mergePendingCommit`:
-
-```kotlin
-mdk.mergePendingCommit(mlsGroupId = "hex_group_id")
 ```
 
 ### Accept Welcome Messages
 
 ```kotlin
-// Get pending welcomes (pass limit / offset, or null for no paging)
-val welcomes = mdk.getPendingWelcomes(limit = null, offset = null)
+// Get pending welcomes
+val welcomes = mdk.getPendingWelcomes()
 
 welcomes.forEach { welcome ->
     println("Invited to: ${welcome.groupName}")
     println("By: ${welcome.welcomer}")
-
-    // Accept the welcome (pass the Welcome itself, not its JSON)
-    mdk.acceptWelcome(welcome)
+    
+    // Accept the welcome
+    mdk.acceptWelcome(welcomeJson = welcome.eventJson)
 }
 ```
 
@@ -347,36 +220,7 @@ welcomes.forEach { welcome ->
 
 ```kotlin
 val welcome = welcomes.first()
-mdk.declineWelcome(welcome)
-```
-
-### Process a Raw Welcome
-
-If you receive a welcome rumor outside of `processMessage` (e.g. unwrapped
-yourself), turn it into a stored `Welcome` so you can `acceptWelcome` it later:
-
-```kotlin
-val welcome = mdk.processWelcome(
-    wrapperEventId = "hex_wrapper_event_id",  // gift-wrap (kind 1059) event ID
-    rumorEventJson = unwrappedRumorJson,
-)
-```
-
-### Get a Welcome by Event ID
-
-```kotlin
-val welcome = mdk.getWelcome(eventId = "hex_event_id")
-```
-
-### JSON-Based Welcome Accept/Decline
-
-The preferred API is `acceptWelcome(welcome)` / `declineWelcome(welcome)`, but
-JSON-string variants exist for callers that don't have a `Welcome` object
-handy:
-
-```kotlin
-mdk.acceptWelcomeJson(welcomeJson = welcomeEventJson)
-mdk.declineWelcomeJson(welcomeJson = welcomeEventJson)
+mdk.declineWelcome(welcomeJson = welcome.eventJson)
 ```
 
 ### Create and Send Messages
@@ -391,9 +235,7 @@ val eventJson = mdk.createMessage(
     mlsGroupId = mlsGroupId,
     senderPublicKey = senderPublicKey,
     content = content,
-    kind = kind,
-    tags = null,        // optional inner-event tags
-    eventTags = null,   // optional outer event tags
+    kind = kind
 )
 
 // eventJson is a JSON string of the encrypted Nostr event
@@ -403,12 +245,7 @@ val eventJson = mdk.createMessage(
 ### Get Messages
 
 ```kotlin
-val messages = mdk.getMessages(
-    mlsGroupId = "hex_group_id",
-    limit = null,        // optional UInt
-    offset = null,       // optional UInt
-    sortOrder = null,    // optional "asc" / "desc"
-)
+val messages = mdk.getMessages(mlsGroupId = "hex_group_id")
 
 messages.forEach { message ->
     println("From: ${message.senderPubkey}")
@@ -421,39 +258,11 @@ messages.forEach { message ->
 ### Get a Specific Message
 
 ```kotlin
-val message = mdk.getMessage(
-    mlsGroupId = "hex_group_id",
-    eventId = "hex_event_id",
-)
+val message = mdk.getMessage(eventId = "hex_event_id")
 if (message != null) {
     println("Message event JSON: ${message.eventJson}")
     // Note: To extract decrypted content, parse the eventJson and extract the content field
 }
-```
-
-### Get the Last Message
-
-Returns the most recent message under the requested ordering. The cached
-`Group.lastMessageId` always reflects `"created_at_first"`, so if your UI
-sorts by `"processed_at_first"` use this method instead for a consistent
-"last message" value.
-
-```kotlin
-val last = mdk.getLastMessage(
-    mlsGroupId = "hex_group_id",
-    sortOrder = "created_at_first",   // or "processed_at_first"
-)
-```
-
-### Delete All Messages for a Group
-
-Removes all locally-stored messages for the group and returns the number of
-deleted rows. This is local-only and does not affect remote relays or other
-members.
-
-```kotlin
-val deleted = mdk.deleteMessagesForGroup(mlsGroupId = "hex_group_id")
-println("Deleted $deleted messages")
 ```
 
 ### Process Incoming Messages
@@ -472,194 +281,46 @@ val eventJson = """
 val result = mdk.processMessage(eventJson = eventJson)
 
 when (result) {
-    is ProcessMessageResult.ApplicationMessage -> {
-        // A regular chat-style message.
-        println("New message event JSON: ${result.message.eventJson}")
+    is MessageProcessingResult.NewMessage -> {
+        println("New message event JSON: ${result.newMessage.eventJson}")
         // Note: To extract decrypted content, parse the eventJson and extract the content field
     }
-    is ProcessMessageResult.Proposal -> {
-        // A proposal that was auto-committed by an admin receiver.
-        // result.result is an UpdateGroupResult to publish.
-        println("Proposal merged for group ${result.result.mlsGroupId}")
+    is MessageProcessingResult.Duplicate -> {
+        println("Message already processed")
     }
-    is ProcessMessageResult.PendingProposal -> {
-        // A proposal stored but not committed (receiver is not admin).
-        println("Pending proposal for group ${result.mlsGroupId}")
-    }
-    is ProcessMessageResult.ExternalJoinProposal -> {
-        println("External join proposal for group ${result.mlsGroupId}")
-    }
-    is ProcessMessageResult.Commit -> {
-        println("Commit applied to group ${result.mlsGroupId}")
-    }
-    is ProcessMessageResult.Unprocessable -> {
-        println("Unprocessable message for group ${result.mlsGroupId}")
-    }
-    is ProcessMessageResult.IgnoredProposal -> {
-        println("Ignored proposal for ${result.mlsGroupId}: ${result.reason}")
-    }
-    ProcessMessageResult.PreviouslyFailed -> {
-        // Message was previously marked as failed and cannot be reprocessed.
-        println("Previously failed message")
+    is MessageProcessingResult.Error -> {
+        println("Error processing: ${result.error}")
     }
 }
 ```
 
-### Process with MLS Context
-
-Like `processMessage`, but the returned value also carries transient MLS
-context such as the sender's leaf index, useful for UI display or
-verification.
+### Process Multiple Messages
 
 ```kotlin
-val result = mdk.processMessageWithContext(eventJson = eventJson)
-// result is a ProcessMessageWithContextResult — same variants as
-// ProcessMessageResult, with additional context fields attached.
-```
+val eventJsons = listOf("{...}", "{...}", "{...}")
+val results = mdk.processMessages(eventJsons = eventJsons)
 
-## Encrypted Media (Messages)
-
-MDK can encrypt attachments with the group's MLS epoch key, produce an IMETA
-tag that lets recipients decrypt the file, and unwind the same process on the
-receive side. Upload the encrypted bytes to any Blossom server.
-
-### Encrypt and Attach Media
-
-```kotlin
-val upload = mdk.encryptMediaForUpload(
-    mlsGroupId = mlsGroupId,
-    data = fileBytes,
-    mimeType = "image/jpeg",
-    filename = "photo.jpg",
-)
-
-// Upload upload.encryptedData to your Blossom server, then build the IMETA tag:
-val uploadedUrl = blossomClient.upload(upload.encryptedData)
-val imetaTag = mdk.createMediaImetaTag(
-    mlsGroupId = mlsGroupId,
-    upload = upload,
-    uploadedUrl = uploadedUrl,
-)
-
-// Pass imetaTag through createMessage's `tags` parameter to attach it.
-```
-
-For custom EXIF stripping, preview-hash, or size limits, use
-`encryptMediaForUploadWithOptions(..., options: MediaProcessingOptionsInput)`.
-
-### Parse and Decrypt Media
-
-```kotlin
-// imetaTag was extracted from the received message's tags
-val reference = mdk.parseMediaImetaTag(
-    mlsGroupId = mlsGroupId,
-    imetaTag = imetaTag,
-)
-
-val encryptedBytes = blossomClient.download(reference.url)
-val plaintext = mdk.decryptMediaFromDownload(
-    mlsGroupId = mlsGroupId,
-    encryptedData = encryptedBytes,
-    reference = reference,
-)
-```
-
-## Group Image Helpers
-
-Group images (set via `GroupDataUpdate.imageHash` / `imageKey` / `imageNonce`)
-use a separate, top-level helper API. These are package-level functions, not
-methods on `Mdk`.
-
-```kotlin
-// Encrypt and prepare a group image for upload
-val prepared = prepareGroupImageForUpload(
-    imageData = imageBytes,
-    mimeType = "image/png",
-)
-// prepared contains the encrypted bytes plus the hash/key/nonce to store
-// in the Group via updateGroupData.
-
-// On the receiving side, decrypt with the values stored on the Group
-val original = decryptGroupImage(
-    encryptedData = downloadedBytes,
-    expectedHash = group.imageHash,
-    imageKey = group.imageKey!!,
-    imageNonce = group.imageNonce!!,
-)
-
-// Derive the deterministic upload keypair (Blossom auth) from the image key
-val pubkey = deriveUploadKeypair(imageKey = group.imageKey!!, version = 1u)
-```
-
-For custom processing, use `prepareGroupImageForUploadWithOptions(..., options)`.
-
-## Group Capabilities and Diagnostics
-
-These methods expose lower-level MLS state. Most apps won't need them, but
-they are useful for capability upgrades, debugging, and admin tooling.
-
-### Capability Upgrades
-
-```kotlin
-// Inspect upgrade readiness for each mirrored proposal type
-val status = mdk.groupCapabilityUpgradeStatus(groupIdHex = "hex_group_id")
-
-// Admin: add the upgradeable proposal types to the group's required capabilities
-val result = mdk.upgradeGroupCapabilities(
-    groupIdHex = "hex_group_id",
-    proposalsToAdd = listOf(MdkProposalType.SELF_REMOVE),
-)
-```
-
-### Required Proposals
-
-```kotlin
-// The proposal types every member is required to support in this group
-val required = mdk.groupRequiredProposals(groupIdHex = "hex_group_id")
-```
-
-### Per-Member Capabilities
-
-```kotlin
-val caps = mdk.groupMemberCapabilities(groupIdHex = "hex_group_id")
-// caps is ordered by MLS leaf index.
-```
-
-### Leaf Indices and Tree Info
-
-```kotlin
-val myLeaf = mdk.ownLeafIndex(groupIdHex = "hex_group_id")
-
-// (leafIndex, hex_pubkey) entries for every active leaf — removed-member holes are omitted
-val leafMap = mdk.groupLeafMap(groupIdHex = "hex_group_id")
-
-// Full ratchet-tree snapshot (for debugging or external verification)
-val treeInfo = mdk.getRatchetTreeInfo(groupIdHex = "hex_group_id")
-```
-
-### Pending Proposal Inspection
-
-Before a commit lands, you can inspect what would change:
-
-```kotlin
-val toAdd     = mdk.pendingAddedMembersPubkeys(groupIdHex = "hex_group_id")
-val toRemove  = mdk.pendingRemovedMembersPubkeys(groupIdHex = "hex_group_id")
-val combined  = mdk.pendingMemberChanges(groupIdHex = "hex_group_id")
+results.forEach { result ->
+    if (result is MessageProcessingResult.NewMessage) {
+        println("Processed message event JSON: ${result.newMessage.eventJson}")
+        // Note: To extract decrypted content, parse the eventJson and extract the content field
+    }
+}
 ```
 
 ## Error Handling
 
-All MDK operations can throw `MdkUniffiException`:
+All MDK operations can throw `MdkUniffiError`:
 
 ```kotlin
 try {
     val groups = mdk.getGroups()
     // Use groups...
-} catch (e: MdkUniffiException.Storage) {
+} catch (e: MdkUniffiError.Storage) {
     println("Storage error: ${e.message}")
-} catch (e: MdkUniffiException.Mdk) {
+} catch (e: MdkUniffiError.Mdk) {
     println("MDK error: ${e.message}")
-} catch (e: MdkUniffiException.InvalidInput) {
+} catch (e: MdkUniffiError.InvalidInput) {
     println("Invalid input: ${e.message}")
 }
 ```
@@ -674,16 +335,14 @@ data class Group(
     val nostrGroupId: String,            // Hex-encoded Nostr group ID
     val name: String,
     val description: String,
-    val imageHash: ByteArray?,           // Optional group image hash
-    val imageKey: ByteArray?,            // Optional group image encryption key
-    val imageNonce: ByteArray?,          // Optional group image encryption nonce
-    val adminPubkeys: List<String>,      // Admin public keys (hex-encoded)
-    val lastMessageId: String?,          // Last message event ID (hex-encoded)
-    val lastMessageAt: ULong?,           // Sender's created_at of last message (Unix timestamp)
-    val lastMessageProcessedAt: ULong?,  // When this client received the last message (Unix timestamp)
-    val epoch: ULong,                    // Current epoch number
-    val state: String,                   // Group state (e.g., "active", "archived")
-    val selfUpdateState: String,         // "required" or "completed_at:<unix_timestamp>"
+    val imageHash: List<UByte>?,        // Optional group image hash
+    val imageKey: List<UByte>?,         // Optional group image encryption key
+    val imageNonce: List<UByte>?,       // Optional group image encryption nonce
+    val adminPubkeys: List<String>,     // Admin public keys (hex-encoded)
+    val lastMessageId: String?,         // Last message event ID (hex-encoded)
+    val lastMessageAt: ULong?,          // Timestamp of last message (Unix timestamp)
+    val epoch: ULong,                   // Current epoch number
+    val state: String                   // Group state (e.g., "active", "archived")
 )
 ```
 
@@ -693,14 +352,13 @@ data class Group(
 data class Message(
     val id: String,                     // Message ID (hex-encoded event ID)
     val mlsGroupId: String,             // Hex-encoded MLS group ID
-    val nostrGroupId: String,           // Hex-encoded Nostr group ID
+    val nostrGroupId: String,            // Hex-encoded Nostr group ID
     val eventId: String,                // Event ID (hex-encoded)
     val senderPubkey: String,           // Sender public key (hex-encoded)
     val eventJson: String,              // JSON representation of the event
-    val createdAt: ULong,               // Sender's created_at (Unix timestamp; may skew vs processedAt)
-    val processedAt: ULong,             // When this client processed/received it (Unix timestamp)
+    val processedAt: ULong,             // Timestamp when message was processed (Unix timestamp)
     val kind: UShort,                   // Message kind
-    val state: String,                  // Message state (e.g., "processed", "pending")
+    val state: String                   // Message state (e.g., "processed", "pending")
 )
 ```
 
@@ -714,15 +372,15 @@ data class Welcome(
     val nostrGroupId: String,           // Hex-encoded Nostr group ID
     val groupName: String,
     val groupDescription: String,
-    val groupImageHash: ByteArray?,     // Optional group image hash
-    val groupImageKey: ByteArray?,      // Optional group image encryption key
-    val groupImageNonce: ByteArray?,    // Optional group image encryption nonce
+    val groupImageHash: List<UByte>?,   // Optional group image hash
+    val groupImageKey: List<UByte>?,    // Optional group image encryption key
+    val groupImageNonce: List<UByte>?,  // Optional group image encryption nonce
     val groupAdminPubkeys: List<String>, // List of admin public keys (hex-encoded)
     val groupRelays: List<String>,      // List of relay URLs for the group
     val welcomer: String,               // Welcomer public key (hex-encoded)
     val memberCount: UInt,              // Current member count
     val state: String,                  // Welcome state (e.g., "pending", "accepted", "declined")
-    val wrapperEventId: String,         // Wrapper event ID (hex-encoded)
+    val wrapperEventId: String         // Wrapper event ID (hex-encoded)
 )
 ```
 
@@ -730,11 +388,8 @@ data class Welcome(
 
 ```kotlin
 data class KeyPackageResult(
-    val keyPackage: String,                // Base64-encoded key package content
-    val tags: List<List<String>>,          // Tags for the kind:30443 event (includes the `d` tag)
-    val tagsLegacy: List<List<String>>,    // Tags for the legacy kind:443 event (omits the `d` tag)
-    val hashRef: ByteArray,                // Serialized hash_ref bytes (for lifecycle tracking)
-    val dTag: String,                      // The `d` tag value for this KeyPackage slot
+    val keyPackage: String,         // Hex-encoded key package
+    val tags: List<List<String>>    // Nostr event tags
 )
 ```
 
@@ -764,12 +419,7 @@ import java.util.concurrent.Executors
 class MdkManager(private val context: Context) {
     // Single-threaded dispatcher to ensure all MDK operations run on the same thread
     private val mdkDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    private val mdk = newMdk(
-        dbPath = context.filesDir.resolve("mdk.db").absolutePath,
-        serviceId = "com.example.myapp",
-        dbKeyId = "mdk.db.key.default",
-        config = null,
-    )
+    private val mdk = newMdk(context.filesDir.resolve("mdk.db").absolutePath)
     
     suspend fun getGroupsAsync(): List<Group> = withContext(mdkDispatcher) {
         mdk.getGroups()
@@ -784,9 +434,7 @@ class MdkManager(private val context: Context) {
             mlsGroupId = groupId,
             senderPublicKey = senderPublicKey,
             content = content,
-            kind = 9u,
-            tags = null,
-            eventTags = null,
+            kind = 9u
         )
     }
     
@@ -804,20 +452,14 @@ import build.marmot.mdk.*
 
 // 1. Initialize
 val dbPath = "/path/to/mdk.db"
-val mdk = newMdk(
-    dbPath = dbPath,
-    serviceId = "com.example.myapp",
-    dbKeyId = "mdk.db.key.default",
-    config = null,
-)
+val mdk = newMdk(dbPath)
 
 // 2. Create and publish key package
 val keyPackage = mdk.createKeyPackageForEvent(
     publicKey = myPublicKey,
     relays = listOf("wss://relay.example.com")
 )
-// Publish keyPackage.keyPackage as a Nostr event of kind 30443
-// (use keyPackage.tags), or kind 443 (use keyPackage.tagsLegacy).
+// Publish keyPackage.keyPackage as Nostr event kind 443
 
 // 3. Create a group
 val groupResult = mdk.createGroup(
@@ -834,19 +476,12 @@ val messageEvent = mdk.createMessage(
     mlsGroupId = groupResult.group.mlsGroupId,
     senderPublicKey = myPublicKey,
     content = "Hello!",
-    kind = 9u,
-    tags = null,
-    eventTags = null,
+    kind = 9u
 )
 // Publish messageEvent to Nostr relays
 
 // 5. Retrieve messages
-val messages = mdk.getMessages(
-    mlsGroupId = groupResult.group.mlsGroupId,
-    limit = null,
-    offset = null,
-    sortOrder = null,
-)
+val messages = mdk.getMessages(mlsGroupId = groupResult.group.mlsGroupId)
 messages.forEach { message ->
     println("${message.senderPubkey}: ${message.eventJson}")
     // Note: To extract decrypted content, parse the eventJson and extract the content field
@@ -901,9 +536,7 @@ class GroupViewModel(
                         mlsGroupId = groupId,
                         senderPublicKey = senderPublicKey,
                         content = content,
-                        kind = 9u,
-                        tags = null,
-                        eventTags = null,
+                        kind = 9u
                     )
                 }
                 // Publish to Nostr
