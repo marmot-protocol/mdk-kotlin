@@ -782,7 +782,7 @@ external fun uniffi_mdk_uniffi_fn_method_mdk_add_members(`ptr`: Long,`mlsGroupId
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_clear_pending_commit(`ptr`: Long,`mlsGroupId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPublicKey`: RustBuffer.ByValue,`memberKeyPackageEventsJson`: RustBuffer.ByValue,`name`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`admins`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+external fun uniffi_mdk_uniffi_fn_method_mdk_create_group(`ptr`: Long,`creatorPublicKey`: RustBuffer.ByValue,`memberKeyPackageEventsJson`: RustBuffer.ByValue,`name`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,`admins`: RustBuffer.ByValue,`disappearingMessageSecs`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 external fun uniffi_mdk_uniffi_fn_method_mdk_create_key_package_for_event(`ptr`: Long,`publicKey`: RustBuffer.ByValue,`relays`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
@@ -1040,7 +1040,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_clear_pending_commit() != 50626.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_group() != 56895.toShort()) {
+    if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_group() != 47513.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mdk_uniffi_checksum_method_mdk_create_key_package_for_event() != 46847.toShort()) {
@@ -1637,7 +1637,7 @@ public interface MdkInterface {
     /**
      * Create a new group
      */
-    fun `createGroup`(`creatorPublicKey`: kotlin.String, `memberKeyPackageEventsJson`: List<kotlin.String>, `name`: kotlin.String, `description`: kotlin.String, `relays`: List<kotlin.String>, `admins`: List<kotlin.String>): CreateGroupResult
+    fun `createGroup`(`creatorPublicKey`: kotlin.String, `memberKeyPackageEventsJson`: List<kotlin.String>, `name`: kotlin.String, `description`: kotlin.String, `relays`: List<kotlin.String>, `admins`: List<kotlin.String>, `disappearingMessageSecs`: kotlin.ULong?): CreateGroupResult
     
     /**
      * Create a key package for a Nostr event
@@ -2264,13 +2264,13 @@ open class Mdk: Disposable, AutoCloseable, MdkInterface
     /**
      * Create a new group
      */
-    @Throws(MdkUniffiException::class)override fun `createGroup`(`creatorPublicKey`: kotlin.String, `memberKeyPackageEventsJson`: List<kotlin.String>, `name`: kotlin.String, `description`: kotlin.String, `relays`: List<kotlin.String>, `admins`: List<kotlin.String>): CreateGroupResult {
+    @Throws(MdkUniffiException::class)override fun `createGroup`(`creatorPublicKey`: kotlin.String, `memberKeyPackageEventsJson`: List<kotlin.String>, `name`: kotlin.String, `description`: kotlin.String, `relays`: List<kotlin.String>, `admins`: List<kotlin.String>, `disappearingMessageSecs`: kotlin.ULong?): CreateGroupResult {
             return FfiConverterTypeCreateGroupResult.lift(
     callWithHandle {
     uniffiRustCallWithError(MdkUniffiException) { _status ->
     UniffiLib.uniffi_mdk_uniffi_fn_method_mdk_create_group(
         it,
-        FfiConverterString.lower(`creatorPublicKey`),FfiConverterSequenceString.lower(`memberKeyPackageEventsJson`),FfiConverterString.lower(`name`),FfiConverterString.lower(`description`),FfiConverterSequenceString.lower(`relays`),FfiConverterSequenceString.lower(`admins`),_status)
+        FfiConverterString.lower(`creatorPublicKey`),FfiConverterSequenceString.lower(`memberKeyPackageEventsJson`),FfiConverterString.lower(`name`),FfiConverterString.lower(`description`),FfiConverterSequenceString.lower(`relays`),FfiConverterSequenceString.lower(`admins`),FfiConverterOptionalULong.lower(`disappearingMessageSecs`),_status)
 }
     }
     )
@@ -3558,6 +3558,11 @@ data class Group (
      * - `"completed_at:<unix_timestamp>"`: Last self-update merged at this time (MIP-00).
      */
     var `selfUpdateState`: kotlin.String
+    , 
+    /**
+     * Disappearing message duration in seconds (None = disabled, Some(n) = n seconds)
+     */
+    var `disappearingMessageSecs`: kotlin.ULong?
     
 ){
     
@@ -3588,6 +3593,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterOptionalULong.read(buf),
         )
     }
 
@@ -3605,7 +3611,8 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterOptionalULong.allocationSize(value.`lastMessageProcessedAt`) +
             FfiConverterULong.allocationSize(value.`epoch`) +
             FfiConverterString.allocationSize(value.`state`) +
-            FfiConverterString.allocationSize(value.`selfUpdateState`)
+            FfiConverterString.allocationSize(value.`selfUpdateState`) +
+            FfiConverterOptionalULong.allocationSize(value.`disappearingMessageSecs`)
     )
 
     override fun write(value: Group, buf: ByteBuffer) {
@@ -3623,6 +3630,7 @@ public object FfiConverterTypeGroup: FfiConverterRustBuffer<Group> {
             FfiConverterULong.write(value.`epoch`, buf)
             FfiConverterString.write(value.`state`, buf)
             FfiConverterString.write(value.`selfUpdateState`, buf)
+            FfiConverterOptionalULong.write(value.`disappearingMessageSecs`, buf)
     }
 }
 
@@ -3666,6 +3674,11 @@ data class GroupDataUpdate (
      * Group admins (optional)
      */
     var `admins`: List<kotlin.String>?
+    , 
+    /**
+     * Disappearing message duration in seconds (optional, use Some(None) to disable)
+     */
+    var `disappearingMessageSecs`: kotlin.ULong??
     
 ){
     
@@ -3689,6 +3702,7 @@ public object FfiConverterTypeGroupDataUpdate: FfiConverterRustBuffer<GroupDataU
             FfiConverterOptionalOptionalByteArray.read(buf),
             FfiConverterOptionalSequenceString.read(buf),
             FfiConverterOptionalSequenceString.read(buf),
+            FfiConverterOptionalOptionalULong.read(buf),
         )
     }
 
@@ -3699,7 +3713,8 @@ public object FfiConverterTypeGroupDataUpdate: FfiConverterRustBuffer<GroupDataU
             FfiConverterOptionalOptionalByteArray.allocationSize(value.`imageKey`) +
             FfiConverterOptionalOptionalByteArray.allocationSize(value.`imageNonce`) +
             FfiConverterOptionalSequenceString.allocationSize(value.`relays`) +
-            FfiConverterOptionalSequenceString.allocationSize(value.`admins`)
+            FfiConverterOptionalSequenceString.allocationSize(value.`admins`) +
+            FfiConverterOptionalOptionalULong.allocationSize(value.`disappearingMessageSecs`)
     )
 
     override fun write(value: GroupDataUpdate, buf: ByteBuffer) {
@@ -3710,6 +3725,7 @@ public object FfiConverterTypeGroupDataUpdate: FfiConverterRustBuffer<GroupDataU
             FfiConverterOptionalOptionalByteArray.write(value.`imageNonce`, buf)
             FfiConverterOptionalSequenceString.write(value.`relays`, buf)
             FfiConverterOptionalSequenceString.write(value.`admins`, buf)
+            FfiConverterOptionalOptionalULong.write(value.`disappearingMessageSecs`, buf)
     }
 }
 
@@ -5918,6 +5934,38 @@ public object FfiConverterOptionalTypeWelcome: FfiConverterRustBuffer<Welcome?> 
         } else {
             buf.put(1)
             FfiConverterTypeWelcome.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalOptionalULong: FfiConverterRustBuffer<kotlin.ULong??> {
+    override fun read(buf: ByteBuffer): kotlin.ULong?? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterOptionalULong.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.ULong??): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterOptionalULong.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.ULong??, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterOptionalULong.write(value, buf)
         }
     }
 }
