@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository is obsolete and is no longer updated. Use the Kotlin bindings in [marmot-protocol/mdk](https://github.com/marmot-protocol/mdk) instead.
+
 ## Basic Usage
 
 ### Installation
@@ -553,4 +556,3 @@ class GroupViewModel(
     }
 }
 ```
-
